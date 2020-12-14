@@ -3,7 +3,6 @@ import logging
 import pandas as pd
 from natsort import natsorted
 
-logger = logging.getLogger('Isoplot.dataprep')
 
 class IsoplotData():
     
@@ -34,7 +33,7 @@ class IsoplotData():
         
         self.datapath = datapath
         
-        self.isoplot_logger = logging.getLogger('Isoplot.dataprep.IsoplotData')
+        self.isoplot_logger = logging.getLogger(__name__)
         
         self.isoplot_logger.debug('Initializing IsoplotData object')
         self.isoplot_logger.info('Reading datafile {} \n'.format(
@@ -86,7 +85,7 @@ class IsoplotData():
         
         try:
             self.isoplot_logger.debug('Trying to read excel template')
-            self.template = pd.read_excel(path)
+            self.template = pd.read_excel(path, engine = 'openpyxl')
             
         except UnicodeDecodeError as uni:
             self.isoplot_logger.error(uni)
@@ -135,7 +134,6 @@ class IsoplotData():
         self.isoplot_logger.debug("Creating IDs...")
         #Nous créons ici une colonne pour identifier chaque ligne avec condition+temps+numero de répétition (possibilité de rajouter un tag metabolite plus tard si besoin)
         self.dfmerge['ID'] = self.dfmerge['condition'].apply(str) + '_T' + self.dfmerge['time'].apply(str) + '_' + self.dfmerge['number_rep'].apply(str)
-        
         
         self.isoplot_logger.debug('Applying final transformations...')
         #Vaut mieux ensuite retransformer les colonnes temps et number_rep en entiers pour éviter des problèmes éventuels de type
