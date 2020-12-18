@@ -5,7 +5,7 @@ import os
 import ipywidgets as widgets
 
 from isoplot.dataprep import IsoplotData
-from isoplot.plots import Plot, Map
+from isoplot.plots import StaticPlot, InteractivePlot, Map
 
 
 class ValueHolder():
@@ -39,10 +39,7 @@ datamerge_btn = widgets.Button(description='Submit Template')
 out = widgets.Output()
 
 out2 = widgets.Output()
-
-debug_view = widgets.Output(layout={'border': '1px solid black'})
     
-@debug_view.capture(clear_output=True)
 def metadatabtn_eventhandler(event):
     global data_object
     
@@ -60,7 +57,6 @@ def metadatabtn_eventhandler(event):
     with out:
         print("Done!")
         
-@debug_view.capture(clear_output=True)
 def dataprep_eventhandler(event):
     
     with out2:
@@ -83,8 +79,7 @@ metadatabtn.on_click(metadatabtn_eventhandler)
 datamerge_btn.on_click(dataprep_eventhandler)
 
 #Fonction permettant le filtrage des données à plotter et appelant les fonctions de plotting
-@debug_view.capture(clear_output=True)
-def indiplot (stack, value, data, name, fmt, metabolites, conditions, times, stackplot=False):
+def indiplot (stack, value, data, name, metabolites, conditions, times, fmt, stackplot=False):
     
     #Préparons le directory où seront enregistrés les html avec les plots
     now = datetime.datetime.now()
@@ -95,7 +90,7 @@ def indiplot (stack, value, data, name, fmt, metabolites, conditions, times, sta
     
     for metabolite in metabolites:
         
-        plotter = Plot(stack, value, data, name, fmt, metabolite, conditions, times)
+        plotter = StaticPlot(stack, value, data, name, metabolite, conditions, times, fmt)
         plotter.display = True
         
         if value != 'mean_enrichment':
@@ -109,7 +104,8 @@ def indiplot (stack, value, data, name, fmt, metabolites, conditions, times, sta
     os.chdir(mydir) #Revenir au dir initial
     
 #Fonction permettant le filtrage des données à plotter et appelant les fonctions de plotting
-def meanplot(stack, value, data, name, fmt, metabolites, conditions, times, stackplot=False):
+def meanplot(stack, value, data, name, metabolites, conditions, times, fmt):
+    
     now = datetime.datetime.now()
     date_time = now.strftime("%d%m%Y_%H%M%S") #Récupération date et heure
     mydir = os.getcwd()
@@ -118,7 +114,7 @@ def meanplot(stack, value, data, name, fmt, metabolites, conditions, times, stac
    
     for metabolite in metabolites:
         
-        plotter = Plot(stack, value, data, name, fmt, metabolite, conditions, times)
+        plotter = StaticPlot(stack, value, data, name, fmt, metabolite, conditions, times, fmt)
         plotter.display = True
         
         if value != 'mean_enrichment':
@@ -129,7 +125,7 @@ def meanplot(stack, value, data, name, fmt, metabolites, conditions, times, stac
     os.chdir(mydir) #Revenir au dir initial  
     
 #Création d'une fonction pour gérer les appels aux fonctions de plotting en individuel
-def indibokplot(stack, value, data, name, fmt, metabolites, conditions, times, stackplot=False):
+def indibokplot(stack, value, data, name, metabolites, conditions, times, stackplot=False):
     
     #Préparons le directory où seront enregistrés les html avec les plots
     now = datetime.datetime.now()
@@ -143,27 +139,27 @@ def indibokplot(stack, value, data, name, fmt, metabolites, conditions, times, s
         if name == '':
             name = metabolite
         
-        plotter = Plot(stack, value, data, name, fmt, metabolite, conditions, times)
+        plotter = InteractivePlot(stack, value, data, name, metabolite, conditions, times)
         plotter.display = True
         
         if value != 'mean_enrichment': #Le cas du mean enrichment est différent car les valeurs sont en double à la sortie d'Isocor   
             
             if stackplot == True:
-                plotter.interactive_stacked_areaplot()
+                plotter.stacked_areaplot()
             
             elif stack == False:
-                plotter.interactive_unstacked_barplot()
+                plotter.unstacked_barplot()
                 
             elif stack == True:
-                plotter.interactive_stacked_barplot()
+                plotter.stacked_barplot()
         
         elif value == 'mean_enrichment':
-            plotter.interactive_mean_enrichment_plot()
+            plotter.mean_enrichment_plot()
             
     os.chdir(mydir) #Revenir au dir initial
     
 #Création d'une fonction pour gérer les appels aux fonctions de plotting en individuel
-def meanbokplot(stack, value, data, name, fmt, metabolites, conditions, times, stackplot=False):
+def meanbokplot(stack, value, data, name, metabolites, conditions, times):
     
     #Préparons le directory où seront enregistrés les html avec les plots
     now = datetime.datetime.now()
@@ -177,19 +173,19 @@ def meanbokplot(stack, value, data, name, fmt, metabolites, conditions, times, s
         if name == '':
             name = metabolite
         
-        plotter = Plot(stack, value, data, name, fmt, metabolite, conditions, times)
+        plotter = InteractivePlot(stack, value, data, name, metabolite, conditions, times)
         plotter.display = True
         
         if value != 'mean_enrichment': #Le cas du mean enrichment est différent car les valeurs sont en double à la sortie d'Isocor   
             
             if stack == False:
-                plotter.interactive_unstacked_meanplot()
+                plotter.unstacked_meanplot()
                 
             elif stack == True:
-                plotter.interactive_stacked_meanplot()
+                plotter.stacked_meanplot()
         
         elif value == 'mean_enrichment':
-            plotter.interactive_mean_enrichment_meanplot()
+            plotter.mean_enrichment_meanplot()
             
     os.chdir(mydir) #Revenir au dir initial
     
@@ -202,9 +198,9 @@ def build_map(data, name, map_select, annot, fmt):
     if map_select == "Static heatmap":
         mapper.build_heatmap()
         
-    elif map_select == 'Interactive heatmap':
+    if map_select == 'Interactive heatmap':
         mapper.fmt = 'html'
         mapper.build_interactive_heatmap()
         
-    else:
+    if map_select == "Static clustermap":
         mapper.build_clustermap()
