@@ -8,8 +8,6 @@ from isoplot.utilities import control_isoplot_plot,control_isoplot_map, get_cli_
 from isoplot.dataprep import IsoplotData
 
 
-
-
 def initialize_cli():
     '''Initialize parser and call main function
     
@@ -17,22 +15,40 @@ def initialize_cli():
     :type parser: class: 'argparse.ArgumentParser'
     :param args: List of strings to parse. The default is taken from sys.argv
     :type args: List of arguments
-    :raises AssertionError: Error raised if format given is not png, svg, pdf, jpeg or html 
-    '''
-	    
+    ''' 
+        
+    #Initiate logger
+    logger = logging.getLogger(__name__)
+    stream_handle = logging.StreamHandler()
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    stream_handle.setFormatter(formatter)
+    logger.addHandler(stream_handle)
+    
+    
     parser = parseArgs()
     args = parser.parse_args()
     
     #Check for typos and input errors
-    try:
-        assert args.format in ['png', 'svg', 'pdf','jpeg', 'html']
-    except AssertionError:
-        print("There has been a problem with the given format. Possible choices are: png, svg, pdf, jpeg, html")
-        raise
+    if args.format not in ['png', 'svg', 'pdf','jpeg', 'html']:
         
-    Main(args)       
+        raise RuntimeError("Format must be png, svg, pdf, jpeg or html")
+    
+    if not os.path.exists(args.destination):
+        
+        raise RuntimeError(
+            f"The entered destination path {args.destination} is not valid. Please check for typos")
+    
+    #Set verbosity
+    if args.verbose == True:
+        logger.setLevel(logging.DEBUG)
+        
+    else:
+        logger.setLevel(logging.INFO)
+        
+    Main(args, logger)       
 
-def Main(args):   
+def Main(args, logger):   
     
     '''Main function responsible for directory creation, launching plot creation 
     and coordinating different modules. Can be put in a separate module if the need 
@@ -59,23 +75,9 @@ def Main(args):
     :param times: list of times that user inputed for plotting
     :type times: list of str
     
-    :raises AssertionError: if inputed destination path does not exist raises error
-    :raises AssertionError: if inputed template path does not exist raises error
+    :raises RuntimeError: if inputed destination path does not exist raises error
+    :raises RuntimeError: if inputed template path does not exist raises error
     '''
-    
-    #Initiate logger
-    logger = logging.getLogger('Isoplot')
-    stream_handle = logging.StreamHandler()
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    stream_handle.setFormatter(formatter)
-    logger.addHandler(stream_handle)
-    
-    #Set verbosity
-    if args.verbose == True:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
     
     logger.debug("Starting main")
     
@@ -85,12 +87,6 @@ def Main(args):
     
     logger.debug("Building end folder")
     
-    try:
-        assert os.path.exists(args.destination)
-    except AssertionError:
-        logger.error("The entered destination path ({}) is not valid. Please check for typos"
-                     .format(args.destination))
-    
     os.chdir(args.destination) #Go to destination
     os.mkdir(args.name + " " + date_time) #Create dir
     os.chdir(args.name + " " + date_time) #Infiltrate dir
@@ -98,11 +94,16 @@ def Main(args):
     logger.debug("Generating data object")
     
     #Initialize data object from path retrieved from user through argument parser
-    data_object = IsoplotData(args.datafile)
-    data_object.get_data()
+    try:
+        data_object = IsoplotData(args.datafile)
+        data_object.get_data()
+        
+    except Exception as dataload_err:
+        raise RuntimeError(f"Error while loading data. \n Error: {dataload_err}")
     
     #If template is not given, we generate it and stop here
     if args.template == 0:
+        
         logger.debug("Generating template")
         data_object.generate_template()
         logger.info("Template has been generated. Check destination folder at {}".format(args.destination))
@@ -112,16 +113,27 @@ def Main(args):
         
         logger.debug("Getting template, merging and preparing data")
         
-        try:
-            assert os.path.exists(args.template)
-        except AssertionError:
-            logger.error("The entered path to template ({}) is not valid. Please check for typos"
-                         .format(args.template))
+        if not os.path.exists(args.template):
+            raise RuntimeError(f"Error in template path {args.template}")
         
         #Fetch template and merge with data
-        data_object.get_template(args.template)
-        data_object.merge_data()
-        data_object.prepare_data()
+        try:
+            data_object.get_template(args.template)
+            
+        except Exception as temp_err:
+            raise RuntimeError(f"Error while getting template file.\n Error: {temp_err}")
+            
+        try:
+            data_object.merge_data()
+            
+        except Exception as merge_err:
+            raise RuntimeError(f"Error while merging data. \n Error: {merge_err}")
+            
+        try:
+            data_object.prepare_data()
+            
+        except Exception as prep_err:
+            raise RuntimeError(f"Error during final preparation of data.\n Error: {prep_err}")
         
         logger.debug("Getting input from cli")
         
@@ -132,19 +144,23 @@ def Main(args):
         
         times = get_cli_input(args.time, "time", data_object, logger)
         
+        logger.info("--------------------")
         logger.info("metabolites: {}".format(metabolites))
         logger.info("conditions: {}".format(conditions))
         logger.info("times: {}".format(times))
+        logger.info("--------------------")
         
         logger.info("Creating plots...")
         
         #Finally we call the function that coordinates the plot creation
         if args.static_heatmap or args.static_clustermap or args.interactive_heatmap:
-            control_isoplot_map(args, data_object)
-        
-        elif metabolites[0] == 'all':
-            for metabolite in data_object.dfmerge['metabolite'].unique():
-                control_isoplot_plot(args, data_object, metabolite, conditions, times)
+            
+            try:
+                control_isoplot_map(args, data_object)
+                
+            except Exception as map_err:
+                raise RuntimeError(f"Error while generating map.\n Error: {map_err}")
+
         
         else:
             for metabolite in metabolites:

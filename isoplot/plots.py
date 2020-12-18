@@ -21,69 +21,78 @@ else:
         print("Modules have been loaded")
         
         
-class Plot():
+class Plot:
     
-    '''Class to create plots from Isocor output (MS data from C13 labelling experiments)
     
-        :param stack: should bars be stacked or not
-        :type stack: boolean
-        :param value: values to be plotted (isotpologue_fraction, corrected_area or mean_enrichment)
-        :type value: str
-        :param data: Merged dataframe from which plots are created (comes from data_object.dfmerge)
-        :type data: Pandas DataFrame
-        :param name: Name of file to be created in destination directory
-        :type name: str
-        :param fmt: Format of output file (if interactive plots are generated,
-                                           any format given will be converted to html)
-        :type fmt: str
-        :param metabolite: Metabolite to be plotted
-        :type metabolite: str
-        :param condition: Conditions to be plotted
-        :type condition: str or list of str
-        :param time: Times to be plotted
-        :type time: Times to be plotted
-        :param static_fig_name: Name of files generated for static plots (
-            metabolite + fmt)
-        :type static_fig_name: concatanated str
-        :param filtered_data: Dataframe filtered on chosen metabolite, conditions and times
-        :type filtered_data: Pandas DataFrame
-        :param display: Should plots be displayed or not when created, default False
-        :type display: Boolean
-        :param WIDTH: Width of generated plot
-        :type WIDTH: int
-        :param HEIGHT: Height of generated plot
-        :type HEIGHT: int
-
+    WIDTH = 1080
+    HEIGHT = 640
     
-    '''
-    
-    WIDTH = 1400
-    HEIGHT = 800
-    
-    def __init__(self, stack, value, data, name, fmt, metabolite, condition, time, display=False):
-        """Initialization of Plot object"""
-
+    def __init__(self, stack, value, data, name, metabolite, condition, time):
+        
         self.stack = stack
         self.value = value
         self.data = data
         self.name = name
-        self.fmt = fmt
         self.metabolite = metabolite
         self.condition = condition
         self.time = time     
-        self.display = display
-        self.static_fig_name = self.metabolite + '.' + self.fmt
         self.filtered_data = self.data[
             (self.data['metabolite'] == self.metabolite) & 
             (self.data['condition'].isin(self.condition)) & 
             (self.data['time'].isin(self.time))]
+        
+    def split_ids(self, ids):
+        """Function to split IDs and get back lists of conditions, times and replicates in order"""
+        
+        count = ids[0].count('_')
+        
+        if count == 2:
+            
+            conditions, times, replicates = [], [], []
+            
+            for i in ids:
+                c, t, r = i.split("_")
+                conditions.append(c)
+                times.append(t)
+                replicates.append(r)
+            
+            return conditions, times, replicates
+        
+        if count == 1:
+            
+            conditions, times = [], []
+            
+            for i in ids:
+                c, t = i.split("_")
+                conditions.append(c)
+                times.append(t)
+                
+            return conditions, times
+        
+        else:
+            
+            raise ValueError('Number of underscores is different from 2 or 3')
+            
+    
+    
+class StaticPlot(Plot):
+    
+    
+    def __init__(self, stack, value, data, name, metabolite, 
+                 condition, time, fmt, display=False):
+        
+        super().__init__(stack, value, data, name, metabolite, condition, time)
+        self.fmt = fmt
+        self.static_fig_name = self.metabolite + '.' + self.fmt
+        self.display = display
+            
     
     def stacked_areaplot(self):
         """Creation of area stackplot (for cinetic data)"""
         
         #Commençons par la préparation de data
-        stackdf = self.filtered_data
-        stackpivot = stackdf.pivot(index='ID', columns='isotopologue', values=self.value)
+        stackpivot = self.filtered_data.pivot(
+            index='ID', columns='isotopologue', values=self.value)
         stackpivot = stackpivot.reindex(index=natsorted(stackpivot.index))
         pivotcol = stackpivot[0:].to_numpy()
         stackyval = pivotcol.transpose()
@@ -143,13 +152,11 @@ class Plot():
     def mean_barplot(self):
         """Creation of meaned barplots (on replicates)"""
          
-        #Nous filtrons et préparons la table pour les donnéees
-        tmpdf = self.filtered_data
         
         #Ici nous faisons les moyennes et les SD des données et nous les mettons dans un df
-        df_replicate_mean = tmpdf.groupby(
+        df_replicate_mean = self.filtered_data.groupby(
             ["condition_order", "condition", "time", "isotopologue"])[self.value].mean()
-        df_replicate_std = tmpdf.groupby(
+        df_replicate_std = self.filtered_data.groupby(
             ["condition_order", "condition", "time", "isotopologue"])[self.value].std()
         df_full = pd.concat([df_replicate_mean, df_replicate_std],  axis=1)
         df_full.columns = ("mean", "std")
@@ -180,20 +187,19 @@ class Plot():
             plt.show()
         plt.close()
 
-    def static_mean_enrichment_plot(self):
+    def mean_enrichment_plot(self):
         """Generate static mean_enrichment plots"""
          
-        #Nous filtrons les données en fonction des paramètres du dashboard
-        tmpdf = self.filtered_data
-        
         #Nous préparons une liste et un df dans lesquels on va ajouter les mean_enrichment 
-        mean_enrichment_df = pd.DataFrame(columns=tmpdf.columns.tolist())
+        mean_enrichment_df = pd.DataFrame(
+            columns=self.filtered_data.columns.tolist())
         list_of_tmpdfs = []
         
         #Nous retirons les duplicats pour chaque ID individuel
-        for ID in tmpdf["ID"].drop_duplicates():
-            tmpdf2 = tmpdf[tmpdf["ID"] == ID].drop_duplicates(subset=['mean_enrichment'])
-            list_of_tmpdfs.append(tmpdf2)
+        for ID in self.filtered_data["ID"].drop_duplicates():
+            tmpdf = self.filtered_data[self.filtered_data["ID"] == ID].drop_duplicates(
+                subset=['mean_enrichment'])
+            list_of_tmpdfs.append(tmpdf)
             
         #Nous mettons l'ordre de conditions en fonction du template, et nous préparons les datas pour plotter
         mean_enrichment_df = pd.concat(list_of_tmpdfs, ignore_index=True)
@@ -217,20 +223,18 @@ class Plot():
             plt.show()
         plt.close()
 
-    def static_mean_enrichment_meanplot(self):
+    def mean_enrichment_meanplot(self):
         """Generate static mean_enrichment plots with meaned replicates"""
-        
-        #Nous filtrons les données en fonction des paramètres du dashboard
-        tmpdf = self.filtered_data
 
         #Nous préparons une liste et un df dans lesquels on va ajouter les mean_enrichment 
-        mean_enrichment_df = pd.DataFrame(columns=tmpdf.columns.tolist())
+        mean_enrichment_df = pd.DataFrame(columns=self.filtered_data.columns.tolist())
         list_of_tmpdfs = []
         
         #Nous retirons les duplicats pour chaque ID individuel
-        for ID in tmpdf["ID"].drop_duplicates():
-            tmpdf2 = tmpdf[tmpdf["ID"] == ID].drop_duplicates(subset=['mean_enrichment'])
-            list_of_tmpdfs.append(tmpdf2)
+        for ID in self.filtered_data["ID"].drop_duplicates():
+            tmpdf = self.filtered_data[
+                self.filtered_data["ID"] == ID].drop_duplicates(subset=['mean_enrichment'])
+            list_of_tmpdfs.append(tmpdf)
         mean_enrichment_df = pd.concat(list_of_tmpdfs, ignore_index=True)
 
         #Ici nous faisons les moyennes et les SD des données et nous les mettons dans un df
@@ -264,11 +268,22 @@ class Plot():
         if self.display == True:
             plt.show()
         plt.close()
+            
+class InteractivePlot(Plot):
+    
+    
+    
+    def __init__(self, stack, value, data, name, metabolite, condition, time):
+        
+        super().__init__(stack, value, data, name, metabolite, condition, time)
+        self.filename = self.metabolite + ".html" 
+        self.plot_tools = "save, wheel_zoom, reset, hover, pan"
+        
 
-    def interactive_mean_enrichment_plot(self):
+    def mean_enrichment_plot(self):
         """Generate interactive mean_enrichment plots"""
         
-        output_file(filename = self.metabolite + ".html", title = self.metabolite + ".html")
+        output_file(filename = self.metabolite + ".html", title = self.metabolite)
 
         #Nous filtrons les données en fonction des paramètres du dashboard
         tmpdf = self.filtered_data
@@ -284,41 +299,51 @@ class Plot():
             
         #Nous mettons l'ordre de conditions en fonction du template, et nous préparons les datas pour plotter
         mean_enrichment_df = pd.concat(list_of_tmpdfs, ignore_index=True)
+        
+        del list_of_tmpdfs
+        
         mean_enrichment_df = mean_enrichment_df[["ID", "condition_order", "mean_enrichment"]]
         mean_enrichment_df.sort_values(by="condition_order", inplace=True)
         mean_enrichment_df.drop(labels="condition_order", axis = 1, inplace=True)
         mean_enrichment_df.set_index("ID", inplace=True)
 
         my_x_range = mean_enrichment_df.index.tolist()
-        source = bk.models.ColumnDataSource(mean_enrichment_df)
+        values = mean_enrichment_df["mean_enrichment"].tolist()
+        conditions, times, replicates = self.split_ids(my_x_range)
+        source = bk.models.ColumnDataSource(dict(x=my_x_range, y=values,
+                                                 conds=conditions,
+                                                 times=times,
+                                                 reps=replicates))
 
         TOOLTIPS = [
-        ("", "@ID"),
-        ("value", "@mean_enrichment"),
+        ("Condition", "@conds"),
+        ("Time", "@times"),
+        ("Replicate", "@reps"),
+        ("Value", "@y")
         ]
 
         myplot = figure(plot_width=self.WIDTH,
                        plot_height=self.HEIGHT,
                        title=self.name,
                        y_axis_label="mean_enrichment",
-                       tools="save, wheel_zoom, reset, hover",
+                       tools=self.plot_tools,
                        tooltips = TOOLTIPS,
                        x_range=my_x_range)
 
         myplot.vbar(width=0.9,
                    bottom=0,
-                   top="mean_enrichment",
+                   top="y",
                    color=cc.glasbey_dark[3],
-                   x="ID",
+                   x="x",
                    source=source)
 
         myplot.xaxis.major_label_orientation = math.pi/4
         show(myplot)
 
-    def interactive_mean_enrichment_meanplot(self):
+    def mean_enrichment_meanplot(self):
         """Generate interactive mean_enrichment plots with meaned replicates"""
         
-        output_file(filename = self.metabolite +".html", title = self.metabolite + ".html")
+        output_file(filename = self.metabolite +".html", title = self.metabolite)
 
         #Nous filtrons les données en fonction des paramètres du dashboard
         tmpdf = self.filtered_data
@@ -362,7 +387,10 @@ class Plot():
         #Nous préparons les datas pour plotter
         my_x_range = mean_series.index.tolist()
         values = mean_series.to_list()
-        my_dict = dict(ID=my_x_range, tops=values)
+        conditions, times, replicates = self.split_ids(my_x_range)
+        my_dict = dict(ID=my_x_range, tops=values,
+                       conds=conditions, times=times,
+                       reps=replicates)
         source = bk.models.ColumnDataSource(my_dict)
 
         #Nous préparons le dictionnaire qui va faire le ColumnDataSource pour les barres d'erreur
@@ -370,15 +398,17 @@ class Plot():
 
         #Passons au plot
         TOOLTIPS = [
-        ("", "@ID"),
-        ("value", "@tops"),
+        ("Condition", "@conds"),
+        ("Time", "@times"),
+        ("Replicate", "@reps"),
+        ("Value", "@tops")
         ]
 
         myplot = figure(plot_width=self.WIDTH,
                        plot_height=self.HEIGHT,
                        title=self.name,
                        y_axis_label="mean_enrichment",
-                       tools="save, wheel_zoom, reset, hover",
+                       tools=self.plot_tools,
                        tooltips = TOOLTIPS,
                        x_range=my_x_range)
 
@@ -401,7 +431,7 @@ class Plot():
         myplot.xaxis.major_label_orientation = math.pi/4
         show(myplot)
 
-    def interactive_stacked_barplot(self):
+    def stacked_barplot(self):
         """Generate interactive stacked barplots"""
         
         output_file(filename = self.metabolite +".html", title = self.metabolite)
@@ -421,29 +451,37 @@ class Plot():
         #Récupérons les noms à mettre en x
         my_x_range = mydatapivot.index.tolist()
         
+        #Nous récupérons les noms pour les tooltips
+        conditions, times, replicates = self.split_ids(my_x_range)
+        
         #Nous faisons ici des listes avec les données pour chaque couche (une couche=un isotopologue)
         listoflists =[mydatapivot[val].tolist() for val in stackers]
 
         #Nous mettons ça dans un dictionnaire pour le ColumnDataSource
         myplotdic = dict(zip(stackers, listoflists))
-        myplotdic.update({'ID' : my_x_range})
+        myplotdic.update({'ID' : my_x_range,
+                          'conds' : conditions,
+                          'times' : times,
+                          'reps' : replicates})
 
         #Préparation des tooltips
         TOOLTIPS = [
-            ("", "@ID"),
-            ("isotopologue", "$name"),
-            ("fraction", "@$name"),
+            ("Condition", "@conds"),
+            ('Time', '@times'),
+            ('Replicate', '@reps'),
+            ("Isotopologue", "$name"),
+            ("Value", "@$name"),
             ]
 
         #Initialization de la figure
         myplot = figure(
             x_range = my_x_range,
-            plot_width=self.WIDTH,
-            plot_height=self.HEIGHT,
-            title=self.name,
-            y_axis_label=self.value,
-            tools="save,wheel_zoom,reset,hover", 
-            tooltips=TOOLTIPS
+            plot_width = self.WIDTH,
+            plot_height = self.HEIGHT,
+            title = self.name,
+            y_axis_label = self.value,
+            tools = self.plot_tools, 
+            tooltips = TOOLTIPS
         )
 
         #Passons au plot
@@ -459,7 +497,7 @@ class Plot():
         show(myplot)
 
 
-    def interactive_unstacked_barplot(self):
+    def unstacked_barplot(self):
         """Generate interactive unstacked barplots"""
         
         output_file(filename = self.metabolite +".html", title = self.metabolite)
@@ -477,6 +515,12 @@ class Plot():
         
         #Nous faisons des tuples avec index et couche à plotter
         factors= [(i, stack) for i in mydatapivot.index for stack in stackers]
+        condition_time = [i[0] for i in factors]
+        isotops = [i[1] for i in factors]
+        
+        #Nous récupérons les noms pour les tooltips
+        conditions, times, replicates = self.split_ids(condition_time)
+        
         
         #Nous récupérons les valeurs de chaque couche
         tops = [row[int(stack)+1] 
@@ -484,11 +528,16 @@ class Plot():
                 for stack in stackers]
         
         #Nous mettons tout ça dans un ColumnDataSource
-        source = bk.models.ColumnDataSource(data=dict(x=factors, tops=tops))
+        source = bk.models.ColumnDataSource(data=dict(
+            x=factors, tops=tops, conds=conditions,
+            times = times, reps = replicates, isotops=isotops))
 
         #Préparation des tooltips
         TOOLTIPS = [
-            ("(Nom, Isotopologue)", "@x"),
+            ("Condition", "@conds"),
+            ("Time", '@times'),
+            ("Replicate", "@reps"),
+            ('Isotopologue', '@isotops'),
             ("Value", "@tops")
             ]
 
@@ -497,7 +546,7 @@ class Plot():
         x_range= bk.models.FactorRange(*factors), #Voir docu sur Bokeh.org pour ça
         plot_width=self.WIDTH, 
         plot_height=self.HEIGHT, 
-        tools="save,wheel_zoom,reset,hover,pan", 
+        tools=self.plot_tools, 
         tooltips=TOOLTIPS)
 
         #Passons au plot
@@ -510,12 +559,13 @@ class Plot():
                                                         factors=stackers, 
                                                         start=1, end=2),
                   line_color="white")
-
+        
+        plot.xaxis.major_label_orientation = math.pi/4
         plot.y_range.start = 0
         plot.x_range.range_padding = 0.1
         show(plot)
 
-    def interactive_stacked_meanplot(self):
+    def stacked_meanplot(self):
         """Generate interactive stacked barplots with meaned replicates"""
         
         output_file(filename = self.metabolite +".html", title = self.metabolite)
@@ -559,12 +609,19 @@ class Plot():
 
         meanplotdic = dict(zip(stackers, mean_listoflists))
         meanplotdic.update({'ID' : my_x_range})
+        
+        #Nous récupérons les noms pour les tooltips
+        conditions, times = self.split_ids(my_x_range)
+        
+        meanplotdic.update({'conds' : conditions,
+                            'times' : times})
 
         #Préparation des tooltips
         TOOLTIPS = [
-            ("", "@ID"),
-            ("isotopologue", "$name"),
-            ("fraction", "@$name"),
+            ("Condition", "@conds"),
+            ("Time", "@times"),
+            ("Isotopologue", "$name"),
+            ("Value", "@$name"),
             ]
 
         #Initialization de la figure
@@ -574,7 +631,7 @@ class Plot():
             plot_height=self.HEIGHT,
             title=self.name,
             y_axis_label=self.value,
-            tools="save,wheel_zoom,reset,hover,pan", 
+            tools=self.plot_tools, 
             tooltips=TOOLTIPS
         )
 
@@ -624,7 +681,7 @@ class Plot():
         myplot.xaxis.major_label_orientation = math.pi/4
         show(myplot)
 
-    def interactive_unstacked_meanplot(self):
+    def unstacked_meanplot(self):
         """Generate interactive unstacked barplots with meaned replicates"""
         
         output_file(filename = self.metabolite +".html", title = self.metabolite)
@@ -658,6 +715,9 @@ class Plot():
 
         #Même principe que pour les non stackés non moyennés sauf que nous préparons les barres d'erreur aussi
         factors= [(i, stack) for i in mean_df_unstack.index for stack in stackers]
+        condition_time = [i[0] for i in factors]
+        isotops = [i[1] for i in factors]
+        conditions, times = self.split_ids(condition_time)
         
         tops=[row[int(stack) + 1] 
               for row in mean_df_unstack.itertuples() 
@@ -672,7 +732,9 @@ class Plot():
                     for stack in stackers]
 
         base = factors
-        source = bk.models.ColumnDataSource(data=dict(x=factors, tops=tops))
+        source = bk.models.ColumnDataSource(data=dict(
+            x=factors, tops=tops, conds = conditions,
+            times = times, isotops=isotops))
         
         #Nous faisons un ColumnDataSource pour les incertitudes
         source_error = bk.models.ColumnDataSource(
@@ -680,17 +742,19 @@ class Plot():
 
         #Préparation des tooltips
         TOOLTIPS = [
-            ("(Nom, Isotopologue)", "@x"),
+            ("Condition", "@conds"),
+            ("Time", "@times"),
+            ("Isotopologue", "@isotops"),
             ("Fraction", "@tops")
             ]
 
         #Initialisation de la figure
         plot = figure(
-        x_range= bk.models.FactorRange(*factors), 
-        plot_width=self.WIDTH, 
-        plot_height=self.HEIGHT, 
-        tools="save,wheel_zoom,reset,hover,pan", 
-        tooltips=TOOLTIPS)
+        x_range = bk.models.FactorRange(*factors), 
+        plot_width = self.WIDTH, 
+        plot_height = self.HEIGHT, 
+        tools = self.plot_tools, 
+        tooltips = TOOLTIPS)
 
         #Passons au plot
         plot.vbar(x='x', 
@@ -710,7 +774,7 @@ class Plot():
         plot.x_range.range_padding = 0.1
         show(plot)
 
-    def interactive_stacked_areaplot(self):
+    def stacked_areaplot(self):
         """Generate interactive stacked areaplots"""
         
         output_file(filename = self.metabolite + ".html", title = self.metabolite)
@@ -730,9 +794,9 @@ class Plot():
             ]
 
         plot = figure(
-        width=1000,
-        height = 600,
-        tools="save,wheel_zoom,reset,hover,pan",
+        width = self.WIDTH,
+        height = self.HEIGHT,
+        tools=self.plot_tools,
         tooltips=TOOLTIPS,
         x_range = stackpivot.index.values
         )
@@ -740,9 +804,8 @@ class Plot():
         plot.xaxis.major_label_orientation = math.pi/4
         plot.varea_stack(mystackers, x = "ID", color=colors, source=mysource)
         show(plot)
-        
     
-class Map():
+class Map:
     
     '''
     Class to create maps from Isocor output (MS data from C13 labelling experiments)
@@ -840,12 +903,12 @@ class Map():
         colors = cc.kbc[len(df)]
         mapper = LinearColorMapper(palette= cc.kbc[:len(df)])
         
-        TOOLTIPS = "hover,save,pan,box_zoom,reset,wheel_zoom"
+        TOOLTIPS = "hover,save"
         
         #initialisation de la figure
         p = figure(title=self.name,
-               x_range=condition_time, y_range=list(reversed(metabolites)),
-               x_axis_location="below", plot_width=1200, plot_height=1200,
+               x_range=list(reversed(metabolites)), y_range=condition_time,
+               x_axis_location="below", plot_width=1080, plot_height=640,
                tools=TOOLTIPS, toolbar_location='above',
                tooltips=[('datapoint', '@metabolite @Condition_Time'), ('value', "@values")])
         
@@ -857,8 +920,8 @@ class Map():
         p.xaxis.major_label_orientation = math.pi / 3
         
         #Passons au plot
-        p.rect(x="Condition_Time", 
-               y="metabolite", 
+        p.rect(x="metabolite", 
+               y="Condition_Time", 
                width=1, height=1,
                source=df,
                fill_color={'field': "values", 'transform': mapper},
@@ -875,3 +938,35 @@ class Map():
         
         show(p)
     
+   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+            

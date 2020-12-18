@@ -12,7 +12,7 @@ class IsoplotData():
     
     :param datapath: Path to .csv file containing Isocor output data
     :type datapath: str
-    :param isoplot_logger: Sublogger of main logger used to inform user of progress and for debugging
+    :param isoplot_logger: Logger object
     :type isoplot_logger: child of logger class: 'logging.Logger'
     :param data: Isocor output data before merge
     :type data: Pandas DataFRame
@@ -34,6 +34,11 @@ class IsoplotData():
         self.datapath = datapath
         
         self.isoplot_logger = logging.getLogger(__name__)
+        stream_handle = logging.StreamHandler()
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        stream_handle.setFormatter(formatter)
+        self.isoplot_logger.addHandler(stream_handle)
         
         self.isoplot_logger.debug('Initializing IsoplotData object')
         self.isoplot_logger.info('Reading datafile {} \n'.format(
@@ -85,7 +90,7 @@ class IsoplotData():
         
         try:
             self.isoplot_logger.debug('Trying to read excel template')
-            self.template = pd.read_excel(path, engine = 'openpyxl')
+            self.template = pd.read_excel(path, engine='openpyxl')
             
         except UnicodeDecodeError as uni:
             self.isoplot_logger.error(uni)
@@ -108,17 +113,14 @@ class IsoplotData():
             self.isoplot_logger.debug('Trying to merge datas')
             self.dfmerge = self.data.merge(self.template)
             
-            assert isinstance(self.dfmerge, pd.DataFrame)
-            
-        except AssertionError:
-            file_type = type(self.dfmerge)
-            logger.error("Merge error, data after merge turned out to be of type {}"
-                         .format(file_type))
+            if not isinstance(self.dfmerge, pd.DataFrame):
+                raise TypeError(f"Error while merging data, dataframe not created. Data turned out to be {type(self.dfmerge)}")
             
         except Exception as err:
             self.isoplot_logger.error(err)
             self.isoplot_logger.error(
                 'Merge impossible. Check column headers or file format (format must be .xlsx)')
+            raise
             
         else:
             self.isoplot_logger.info('Dataframes have been merged')
@@ -134,6 +136,7 @@ class IsoplotData():
         self.isoplot_logger.debug("Creating IDs...")
         #Nous créons ici une colonne pour identifier chaque ligne avec condition+temps+numero de répétition (possibilité de rajouter un tag metabolite plus tard si besoin)
         self.dfmerge['ID'] = self.dfmerge['condition'].apply(str) + '_T' + self.dfmerge['time'].apply(str) + '_' + self.dfmerge['number_rep'].apply(str)
+        
         
         self.isoplot_logger.debug('Applying final transformations...')
         #Vaut mieux ensuite retransformer les colonnes temps et number_rep en entiers pour éviter des problèmes éventuels de type

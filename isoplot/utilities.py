@@ -1,9 +1,9 @@
 import argparse
 import logging
 
-from isoplot.plots import Plot, Map
+from isoplot.plots import StaticPlot, InteractivePlot, Map
 
-logger = logging.getLogger('Isoplot.utilities')
+logger = logging.getLogger(__name__)
 
 def parseArgs():
     
@@ -81,45 +81,49 @@ def control_isoplot_plot(args, data_object, metabolite, conditions, times):
     
     logger.debug("Initiating plot object")
     
-    myplot = Plot(args.stack, args.value, data_object.dfmerge, args.name, args.format, metabolite, conditions, times)
+    static_plot = StaticPlot(args.stack, args.value, data_object.dfmerge, 
+                             args.name, metabolite, conditions, times, args.format,)
+    
+    interactive_plot = InteractivePlot(args.stack, args.value, data_object.dfmerge, 
+                                       args.name, metabolite, conditions, times)
     
     logger.debug("Selecting plot method")
     
     if args.stacked_areaplot:
-        myplot.stacked_areaplot()
+        static_plot.stacked_areaplot()
     
     elif args.barplot:
-        myplot.barplot()
+        static_plot.barplot()
         
     elif args.meaned_barplot:
-        myplot.mean_barplot()
+        static_plot.mean_barplot()
     
     elif args.static_mean_enrichment_plot:
-        myplot.static_mean_enrichment_plot()
+        static_plot.mean_enrichment_plot()
         
-    elif args.static_mean_enrichment_plot:
-        myplot.static_mean_enrichment_plot()
+    elif args.static_mean_enrichment_meanplot:
+        static_plot.mean_enrichment_meanplot()
         
     elif args.interactive_mean_enrichment_plot:
-        myplot.interactive_mean_enrichment_plot()
+        interactive_plot.mean_enrichment_plot()
     
     elif args.interactive_mean_enrichment_meanplot:
-        myplot.interactive_mean_enrichment_meanplot()
+        interactive_plot.mean_enrichment_meanplot()
 
     elif args.interactive_stacked_barplot:
-        myplot.interactive_stacked_barplot()
+        interactive_plot.stacked_barplot()
         
     elif args.interactive_stacked_barplot and args.stack == False:
-        myplot.interactive_unstacked_barplot
+        interactive_plot.unstacked_barplot()
         
     elif args.interactive_stacked_meanplot:
-        myplot.interactive_stacked_meaplot()
+        interactive_plot.stacked_meanplot()
         
     elif args.interactive_stacked_meanplot and args.stack == False:
-        myplot.interactive_unstacked_meanplot()
+        interactive_plot.unstacked_meanplot()
         
     elif args.interactive_stacked_areaplot:
-        myplot.interactive_stacked_areaplot()
+        interactive_plot.stacked_areaplot()
 
 def control_isoplot_map(args, data_object):
     '''Function to control which map methods are called depending on the 
@@ -231,3 +235,25 @@ def get_cli_input(arg, name, data_object, logger):
         desire = data_object.dfmerge[name].unique() 
             
     return desire
+
+# DECORATORS
+
+def new_dir(original_function):
+    def wrapper_function(*args, **kwargs):
+        from datetime import datetime
+        from os import mkdir, chdir, getcwd
+        now_time = datetime.now()
+        date_time = now_time.strftime("%d%m%Y_%H%M%S") #Récupération date et heure
+        mydir = getcwd()
+        name = getattr(original_function, 'name')
+        mkdir(name + " " + date_time) #Créons le dir
+        chdir(name + " " + date_time) #Rentrons dans le dir
+        
+        result = original_function(*args, **kwargs)
+        
+        chdir(mydir)
+        
+        return result
+    return wrapper_function
+            
+            
