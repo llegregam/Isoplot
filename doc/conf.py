@@ -21,8 +21,14 @@ project = 'Isoplot'
 copyright = '2020, Loïc LE GREGAM'
 author = 'Loïc LE GREGAM'
 
-# The full version, including alpha/beta/rc tags
-release = '0.0.1'
+import isoplot  # NB: the *installed* version that is used in the notebooks
+
+full_version = isoplot.__version__  # x.y.z
+# The short X.Y version.
+version = '.'.join(full_version.split('.')[:-1])
+# The full version, including alpha/beta/rc tags.
+# Do not forget to update PyPi (setup.py) version
+release = full_version
 
 
 # -- General configuration ---------------------------------------------------
@@ -54,4 +60,4 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['images']
+html_static_path = ['_static']

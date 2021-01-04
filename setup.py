@@ -2,10 +2,17 @@ from setuptools import setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+	
+# Version is maintained in the __init__.py file
+with open("isoplot/__init__.py") as f:
+    try:
+        VERSION = re.findall(r"^__version__ = ['\"]([^'\"]*)['\"]", f.read(), re.M)[0]
+    except IndexError:
+        raise RuntimeError('Unable to determine version.')
 
 setup(
 	name="isoplot",
-	version='2.0.0',
+	version=VERSION,
 	description='Generate figures from Isocor output',
     classifiers=["Development Status :: 4 - Beta",
                 "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

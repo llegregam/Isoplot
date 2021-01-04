@@ -14,26 +14,26 @@ Jupyter Notebook through the **Anaconda Launcher** or through the command line.
  
 Once in the Notebook, navigate to the appropriate folder and open isoplot.ipynb
  
-.. image:: image/walkthrough/Image1.png
+.. image:: _static/walkthrough/Image1.png
    :width: 100%
    :align: left
 
 
 Next, select the first cell and execute it. 
 
-.. image:: image/walkthrough/Image2.png
+.. image:: _static/walkthrough/Image2.png
    :width: 100%
    :align: left
    
 Once the buttons have appeared, use the first one to select the **datafile** and then the second one to submit it.
 
-.. image:: image/walkthrough/Image3.png
+.. image:: _static/walkthrough/Image3.png
    :width: 100%
    :align: left
 
 In the file explorer, navigate to the generated **ModifyThis.xlsx** template file and open it.
 
-.. image:: image/walkthrough/Image4.png
+.. image:: _static/walkthrough/Image4.png
    :width: 100%
    :align: left
 
@@ -41,7 +41,7 @@ Fill the file with your conditions, times, replicate numbers, etc… then save i
 
 .. warning:: What you input here will be used by Isoplot to generate the groups for plotting (ex: condition AB at T0 replicate 1). **If you have multiple replicates for one same time and condition, number them starting from 1**.
 
-.. image:: image/walkthrough/Image5.png
+.. image:: _static/walkthrough/Image5.png
    :width: 100%
    :align: left
    
@@ -52,13 +52,13 @@ you have finished modifying the template, save it.
 
 Example of finished template file:
 
-.. image:: image/walkthrough/Image6.png
+.. image:: _static/walkthrough/Image6.png
    :width: 100%
    :align: left
    
 Next step is to launch the next cell to generate the buttons to upload and submit the template. Once this is done you can start plotting your figures!
  
-.. image:: image/walkthrough/Image7.png
+.. image:: _static/walkthrough/Image7.png
    :width: 100%
    :align: left
    

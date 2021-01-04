@@ -1,4 +1,4 @@
-.. image:: image/Logo.png
+.. image:: _static/Logo.png
    :width: 22%
    :align: left
 
