@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -24,6 +24,7 @@ setup(
                 "Programming Language :: Python :: 3.9",
                 "Topic :: Scientific/Engineering :: Bio-Informatics"],
     long_description=long_description,
+	packages=find_packages(),
     install_requires = [
         "numpy>=1.19.1",
         "pandas>=1.1.1",
