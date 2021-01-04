@@ -21,8 +21,6 @@ project = 'Isoplot'
 copyright = '2020, Loïc LE GREGAM'
 author = 'Loïc LE GREGAM'
 
-import isoplot  # NB: the *installed* version that is used in the notebooks
-
 full_version = isoplot.__version__  # x.y.z
 # The short X.Y version.
 version = '.'.join(full_version.split('.')[:-1])
