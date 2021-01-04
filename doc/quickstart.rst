@@ -22,8 +22,7 @@ Jupyter Notebook
 First install jupyter notebook through the Anaconda Navigator or through `the dedicated website <https://jupyter.org/install>`_
 and launch the notebook.
 
-Navigate to the **Isoplot.ipynb** file that you can download from the readthedocs page or directly from Github. 
-[Picture of the file manager of jupyter notebook]
+Navigate to the **Isoplot.ipynb** file that you can download from the `Github <https://github.com/LoloPopoPy/Isoplot2>`_.
 
 Launch the first cell to initiate the **« upload data »** and **« submit data »** 
 buttons and use them to load in the tsv or csv IsoCor output file and generate the **template file** (ModifyThis.xlsx)
