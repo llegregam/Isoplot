@@ -21,11 +21,7 @@ project = 'Isoplot'
 copyright = '2020, Loïc LE GREGAM'
 author = 'Loïc LE GREGAM'
 
-full_version = isoplot.__version__  # x.y.z
-# The short X.Y version.
-version = '.'.join(full_version.split('.')[:-1])
-# The full version, including alpha/beta/rc tags.
-# Do not forget to update PyPi (setup.py) version
+full_version = '2.0.1'
 release = full_version
 
 
