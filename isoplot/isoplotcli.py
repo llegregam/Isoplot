@@ -1,4 +1,4 @@
-'''Isoplot2 MAIN MODULE containing argument parser, cli initialization and main logger creation.'''
+'''Isoplot2 cli module containing argument parser, cli initialization and main logger creation.'''
 
 import datetime
 import os
