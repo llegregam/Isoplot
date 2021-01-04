@@ -8,8 +8,7 @@ sphinx:
     builder: html
     fail_on_warning: true
 
-formats:
-    -pdf   
+formats: pdf   
     
 python:
     version: 3.8
