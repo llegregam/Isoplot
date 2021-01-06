@@ -1,13 +1,24 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+import re
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+
+def open_readme_file():
+    with open('README.rst') as f:
+	     data = f.read()
+    return data
+	
+# Version is maintained in the __init__.py file
+with open("isoplot/__init__.py") as f:
+    try:
+        VERSION = re.findall(r"^__version__ = ['\"]([^'\"]*)['\"]", f.read(), re.M)[0]
+    except IndexError:
+        raise RuntimeError('Unable to determine version.')
 
 setup(
-	name="isoplot",
-	version='2.0.0',
-	description='Generate figures from Isocor output',
-    classifiers=["Development Status :: 4 - Beta",
+	name = "isoplot",
+	version = VERSION,
+	description = 'Generate figures from Isocor output',
+    classifiers = ["Development Status :: 4 - Beta",
                 "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
                 "Natural Language :: French",
                 "Operating System :: OS Independent",
@@ -16,7 +27,8 @@ setup(
                 "Programming Language :: Python :: 3.8",
                 "Programming Language :: Python :: 3.9",
                 "Topic :: Scientific/Engineering :: Bio-Informatics"],
-    long_description=long_description,
+    long_description = open_readme_file(),
+	packages = find_packages(),
     install_requires = [
         "numpy>=1.19.1",
         "pandas>=1.1.1",
@@ -29,12 +41,12 @@ setup(
         "openpyxl>=3.0.5",
         "xlrd>=1.2.0"
     ], 
-	entry_points={
+	entry_points = {
         'console_scripts': [
             'isoplot = isoplot.isoplotcli:initialize_cli',
         ]},
-    url="https://forgemia.inra.fr/metatoul/isoplot2",
-    author="Loïc Le Grégam",
-    author_email="loic.le-gregam@insa-toulouse.fr"
+    url = "https://forgemia.inra.fr/metatoul/isoplot2",
+    author = "Loïc Le Grégam",
+    author_email = "loic.le-gregam@insa-toulouse.fr"
     
 )
