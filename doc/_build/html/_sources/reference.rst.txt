@@ -1,6 +1,22 @@
 Reference
 ********************************************************************************
 
+:file:`dataprep.py`
+-----------------------
+
+.. automodule:: isoplot.dataprep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+:file:`plots.py`
+-----------------------
+
+.. automodule:: isoplot.plots
+   :members:
+   :undoc-members:
+   :show-inheritance: True
+
 :file:`isoplotcli.py`
 -----------------------
 
@@ -9,13 +25,12 @@ Reference
    :undoc-members:
    :show-inheritance:
 
+:file:`isoplot_notebook.py`
+---------------------------
 
-:file:`plots.py`
------------------------
-
-.. automodule:: isoplot.plots
+.. automodule:: isoplot.isoplot_notebook
    :members:
-   :undoc-members:
+   :undoc-members: True
    :show-inheritance:
   
 :file:`utilities.py`
@@ -26,11 +41,5 @@ Reference
    :undoc-members:
    :show-inheritance:
    
-:file:`dataprep.py`
------------------------
 
-.. automodule:: isoplot.dataprep
-   :members:
-   :undoc-members:
-   :show-inheritance:
    

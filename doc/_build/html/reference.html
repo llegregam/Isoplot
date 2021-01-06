@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Reference &mdash; Isoplot 2.0.1 documentation</title>
+  <title>Reference &mdash; Isoplot 1.0.1 documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -50,7 +52,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Isoplot
+            <a href="index.html" class="icon icon-home"> Isoplot
           
 
           
@@ -92,10 +94,11 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="definitions.html">Definitions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-isoplot.isoplotcli"><code class="file docutils literal notranslate"><span class="pre">isoplotcli.py</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-isoplot.plots"><code class="file docutils literal notranslate"><span class="pre">plots.py</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-isoplot.utilities"><code class="file docutils literal notranslate"><span class="pre">utilities.py</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-isoplot.dataprep"><code class="file docutils literal notranslate"><span class="pre">dataprep.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-isoplot.plots"><code class="file docutils literal notranslate"><span class="pre">plots.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-isoplot.isoplotcli"><code class="file docutils literal notranslate"><span class="pre">isoplotcli.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-isoplot.isoplot_notebook"><code class="file docutils literal notranslate"><span class="pre">isoplot_notebook.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-isoplot.utilities"><code class="file docutils literal notranslate"><span class="pre">utilities.py</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -138,6 +141,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -149,7 +154,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/reference.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -165,267 +170,6 @@
             
   <div class="section" id="reference">
 <h1>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-isoplot.isoplotcli">
-<span id="isoplotcli-py"></span><h2><code class="file docutils literal notranslate"><span class="pre">isoplotcli.py</span></code><a class="headerlink" href="#module-isoplot.isoplotcli" title="Permalink to this headline">¶</a></h2>
-<p>Isoplot2 MAIN MODULE containing argument parser, cli initialization and main logger creation.</p>
-<dl class="py function">
-<dt id="isoplot.isoplotcli.Main">
-<code class="sig-prename descclassname">isoplot.isoplotcli.</code><code class="sig-name descname">Main</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em>, <em class="sig-param"><span class="n">logger</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplotcli.Main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main function responsible for directory creation, launching plot creation 
-and coordinating different modules. Can be put in a separate module if the need 
-ever arises (if a GUI is created for example).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> (<em>list of arguments</em>) – List of strings to parse. The default is taken from sys.argv</p></li>
-<li><p><strong>logger</strong> (<em>class: 'logging.Logger'</em>) – main logger that will be derived in other modules</p></li>
-<li><p><strong>stream_handle</strong> (<em>class: 'logging.Handler'</em>) – logger handler that sends log to stream</p></li>
-<li><p><strong>formatter</strong> (<em>class: 'logging.Formatter'</em>) – formatter to give log format of logger</p></li>
-<li><p><strong>now</strong> (<em>class: 'datetime.datetime'</em>) – current date and time in format code. Used when creating directory in which plots and log will go</p></li>
-<li><p><strong>date_time</strong> (<em>str</em>) – formatted string based on format code returned by datetime.datetime.now()</p></li>
-<li><p><strong>data_object</strong> (<em>class: 'IsoplotData'</em>) – data container used to get data and clean data before plotting</p></li>
-<li><p><strong>metabolites</strong> (<em>list of str</em>) – list of metabolites that user inputed for plotting</p></li>
-<li><p><strong>conditions</strong> (<em>list of str</em>) – list of conditions that user inputed for plotting</p></li>
-<li><p><strong>times</strong> (<em>list of str</em>) – list of times that user inputed for plotting</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>RuntimeError</strong> – if inputed destination path does not exist raises error</p></li>
-<li><p><strong>RuntimeError</strong> – if inputed template path does not exist raises error</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="isoplot.isoplotcli.initialize_cli">
-<code class="sig-prename descclassname">isoplot.isoplotcli.</code><code class="sig-name descname">initialize_cli</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplotcli.initialize_cli" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize parser and call main function</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>parser</strong> (<em>class: 'argparse.ArgumentParser'</em>) – variable to store the Argument parser object</p></li>
-<li><p><strong>args</strong> (<em>List of arguments</em>) – List of strings to parse. The default is taken from sys.argv</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
-<div class="section" id="module-isoplot.plots">
-<span id="plots-py"></span><h2><code class="file docutils literal notranslate"><span class="pre">plots.py</span></code><a class="headerlink" href="#module-isoplot.plots" title="Permalink to this headline">¶</a></h2>
-<p>Module containing Plot class. The methods correspond to different types of plots to create</p>
-<dl class="py class">
-<dt id="isoplot.plots.InteractivePlot">
-<em class="property">class </em><code class="sig-prename descclassname">isoplot.plots.</code><code class="sig-name descname">InteractivePlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolite</span></em>, <em class="sig-param"><span class="n">condition</span></em>, <em class="sig-param"><span class="n">time</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#isoplot.plots.Plot" title="isoplot.plots.Plot"><code class="xref py py-class docutils literal notranslate"><span class="pre">isoplot.plots.Plot</span></code></a></p>
-<dl class="py method">
-<dt id="isoplot.plots.InteractivePlot.mean_enrichment_meanplot">
-<code class="sig-name descname">mean_enrichment_meanplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.mean_enrichment_meanplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate interactive mean_enrichment plots with meaned replicates</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.InteractivePlot.mean_enrichment_plot">
-<code class="sig-name descname">mean_enrichment_plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.mean_enrichment_plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate interactive mean_enrichment plots</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.InteractivePlot.stacked_areaplot">
-<code class="sig-name descname">stacked_areaplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.stacked_areaplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate interactive stacked areaplots</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.InteractivePlot.stacked_barplot">
-<code class="sig-name descname">stacked_barplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.stacked_barplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate interactive stacked barplots</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.InteractivePlot.stacked_meanplot">
-<code class="sig-name descname">stacked_meanplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.stacked_meanplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate interactive stacked barplots with meaned replicates</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.InteractivePlot.unstacked_barplot">
-<code class="sig-name descname">unstacked_barplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.unstacked_barplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate interactive unstacked barplots</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.InteractivePlot.unstacked_meanplot">
-<code class="sig-name descname">unstacked_meanplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.unstacked_meanplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate interactive unstacked barplots with meaned replicates</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="isoplot.plots.Map">
-<em class="property">class </em><code class="sig-prename descclassname">isoplot.plots.</code><code class="sig-name descname">Map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">annot</span></em>, <em class="sig-param"><span class="n">fmt</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Map" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class to create maps from Isocor output (MS data from C13 labelling experiments)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>heatmapdf</strong><strong>(</strong><strong>dataframe</strong><strong>)</strong> – Modified dfmerge dataframe used for creating heatmaps</p></li>
-<li><p><strong>dc_heatmap</strong> (<em>Pandas DataFrame</em>) – Heatmapdf but described (check pandas.DataFrame.describe method for details)</p></li>
-<li><p><strong>heatmap_center</strong> (<em>float</em>) – Value to center colormap used in heatmaps and clustermaps</p></li>
-<li><p><strong>clustermapdf</strong> (<em>Pandas DataFrame</em>) – Modified dfmerge dataframe used for creating clustermaps</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt id="isoplot.plots.Map.build_clustermap">
-<code class="sig-name descname">build_clustermap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Map.build_clustermap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a clustermap of mean_enrichment data across 
-all conditions &amp; times &amp; metabolites</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.Map.build_heatmap">
-<code class="sig-name descname">build_heatmap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Map.build_heatmap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a heatmap of mean_enrichment data across 
-all conditions &amp; times &amp; metabolites</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.Map.build_interactive_heatmap">
-<code class="sig-name descname">build_interactive_heatmap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Map.build_interactive_heatmap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create an interactive heatmap of mean_enrichment data across 
-all conditions &amp; times &amp; metabolites</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="isoplot.plots.Plot">
-<em class="property">class </em><code class="sig-prename descclassname">isoplot.plots.</code><code class="sig-name descname">Plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolite</span></em>, <em class="sig-param"><span class="n">condition</span></em>, <em class="sig-param"><span class="n">time</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py attribute">
-<dt id="isoplot.plots.Plot.HEIGHT">
-<code class="sig-name descname">HEIGHT</code><em class="property"> = 640</em><a class="headerlink" href="#isoplot.plots.Plot.HEIGHT" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="isoplot.plots.Plot.WIDTH">
-<code class="sig-name descname">WIDTH</code><em class="property"> = 1080</em><a class="headerlink" href="#isoplot.plots.Plot.WIDTH" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.Plot.split_ids">
-<code class="sig-name descname">split_ids</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ids</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Plot.split_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to split IDs and get back lists of conditions, times and replicates in order</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="isoplot.plots.StaticPlot">
-<em class="property">class </em><code class="sig-prename descclassname">isoplot.plots.</code><code class="sig-name descname">StaticPlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolite</span></em>, <em class="sig-param"><span class="n">condition</span></em>, <em class="sig-param"><span class="n">time</span></em>, <em class="sig-param"><span class="n">fmt</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#isoplot.plots.Plot" title="isoplot.plots.Plot"><code class="xref py py-class docutils literal notranslate"><span class="pre">isoplot.plots.Plot</span></code></a></p>
-<dl class="py method">
-<dt id="isoplot.plots.StaticPlot.barplot">
-<code class="sig-name descname">barplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.barplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creation of barplots</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.StaticPlot.mean_barplot">
-<code class="sig-name descname">mean_barplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.mean_barplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creation of meaned barplots (on replicates)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.StaticPlot.mean_enrichment_meanplot">
-<code class="sig-name descname">mean_enrichment_meanplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.mean_enrichment_meanplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate static mean_enrichment plots with meaned replicates</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.StaticPlot.mean_enrichment_plot">
-<code class="sig-name descname">mean_enrichment_plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.mean_enrichment_plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate static mean_enrichment plots</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="isoplot.plots.StaticPlot.stacked_areaplot">
-<code class="sig-name descname">stacked_areaplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.stacked_areaplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creation of area stackplot (for cinetic data)</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-isoplot.utilities">
-<span id="utilities-py"></span><h2><code class="file docutils literal notranslate"><span class="pre">utilities.py</span></code><a class="headerlink" href="#module-isoplot.utilities" title="Permalink to this headline">¶</a></h2>
-<dl class="py function">
-<dt id="isoplot.utilities.control_isoplot_map">
-<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">control_isoplot_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em>, <em class="sig-param"><span class="n">data_object</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.control_isoplot_map" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to control which map methods are called depending on the 
-arguments that were parsed</p>
-</dd></dl>
-
-<dl class="py function">
-<dt id="isoplot.utilities.control_isoplot_plot">
-<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">control_isoplot_plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em>, <em class="sig-param"><span class="n">data_object</span></em>, <em class="sig-param"><span class="n">metabolite</span></em>, <em class="sig-param"><span class="n">conditions</span></em>, <em class="sig-param"><span class="n">times</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.control_isoplot_plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to control which plot methods are called depending on the 
-arguments that were parsed</p>
-</dd></dl>
-
-<dl class="py function">
-<dt id="isoplot.utilities.get_cli_input">
-<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">get_cli_input</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arg</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">data_object</span></em>, <em class="sig-param"><span class="n">logger</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.get_cli_input" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to get input from user and check for errors in spelling.
-If an error is detected input is asked once more.
-This function is used for galaxy implementation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>is_error</strong> (<em>boolean</em>) – True while the user input is invalid</p></li>
-<li><p><strong>desire</strong> (<em>list of str</em>) – container for the CLI user input</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="isoplot.utilities.get_local_cli_input">
-<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">get_local_cli_input</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">data_object</span></em>, <em class="sig-param"><span class="n">logger</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.get_local_cli_input" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to get input from user and check for errors in spelling. 
-If an error is detected input is asked once more.
-This function shall be used for local installations only</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>is_error</strong> (<em>boolean</em>) – True while the user input is invalid</p></li>
-<li><p><strong>desire</strong> (<em>list of str</em>) – container for the CLI user input</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="isoplot.utilities.new_dir">
-<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">new_dir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">original_function</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.new_dir" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="isoplot.utilities.parseArgs">
-<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">parseArgs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.parseArgs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creation of Isoplot parser for usage of CLI</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>parser</strong> (<em>class: arparse.ArgumentParser</em>) – parser object used to parse arguments from clithrough sys.argv</p>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
 <div class="section" id="module-isoplot.dataprep">
 <span id="dataprep-py"></span><h2><code class="file docutils literal notranslate"><span class="pre">dataprep.py</span></code><a class="headerlink" href="#module-isoplot.dataprep" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
@@ -486,6 +230,325 @@ not .xlsx or encoding is not utf-8</p></li>
 </dd></dl>
 
 </div>
+<div class="section" id="module-isoplot.plots">
+<span id="plots-py"></span><h2><code class="file docutils literal notranslate"><span class="pre">plots.py</span></code><a class="headerlink" href="#module-isoplot.plots" title="Permalink to this headline">¶</a></h2>
+<p>Module containing the plotting classes. The methods correspond to different types of plots to create</p>
+<dl class="py class">
+<dt id="isoplot.plots.InteractivePlot">
+<em class="property">class </em><code class="sig-prename descclassname">isoplot.plots.</code><code class="sig-name descname">InteractivePlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolite</span></em>, <em class="sig-param"><span class="n">condition</span></em>, <em class="sig-param"><span class="n">time</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#isoplot.plots.Plot" title="isoplot.plots.Plot"><code class="xref py py-class docutils literal notranslate"><span class="pre">isoplot.plots.Plot</span></code></a></p>
+<p>Class to generate the different interactive plots</p>
+<dl class="py method">
+<dt id="isoplot.plots.InteractivePlot.mean_enrichment_meanplot">
+<code class="sig-name descname">mean_enrichment_meanplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.mean_enrichment_meanplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate interactive mean_enrichment plots with meaned replicates</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.InteractivePlot.mean_enrichment_plot">
+<code class="sig-name descname">mean_enrichment_plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.mean_enrichment_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate interactive mean_enrichment plots</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.InteractivePlot.stacked_areaplot">
+<code class="sig-name descname">stacked_areaplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.stacked_areaplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate interactive stacked areaplots</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.InteractivePlot.stacked_barplot">
+<code class="sig-name descname">stacked_barplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.stacked_barplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate interactive stacked barplots</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.InteractivePlot.stacked_meanplot">
+<code class="sig-name descname">stacked_meanplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.stacked_meanplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate interactive stacked barplots with meaned replicates</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.InteractivePlot.unstacked_barplot">
+<code class="sig-name descname">unstacked_barplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.unstacked_barplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate interactive unstacked barplots</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.InteractivePlot.unstacked_meanplot">
+<code class="sig-name descname">unstacked_meanplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.InteractivePlot.unstacked_meanplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate interactive unstacked barplots with meaned replicates</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="isoplot.plots.Map">
+<em class="property">class </em><code class="sig-prename descclassname">isoplot.plots.</code><code class="sig-name descname">Map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">annot</span></em>, <em class="sig-param"><span class="n">fmt</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to create maps from Isocor output (MS data from C13 labelling experiments)</p>
+<dl class="py method">
+<dt id="isoplot.plots.Map.build_clustermap">
+<code class="sig-name descname">build_clustermap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Map.build_clustermap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a clustermap of mean_enrichment data across
+all conditions &amp; times &amp; metabolites</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.Map.build_heatmap">
+<code class="sig-name descname">build_heatmap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Map.build_heatmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a heatmap of mean_enrichment data across
+all conditions &amp; times &amp; metabolites</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.Map.build_interactive_heatmap">
+<code class="sig-name descname">build_interactive_heatmap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Map.build_interactive_heatmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an interactive heatmap of mean_enrichment data across
+all conditions &amp; times &amp; metabolites</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="isoplot.plots.Plot">
+<em class="property">class </em><code class="sig-prename descclassname">isoplot.plots.</code><code class="sig-name descname">Plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolite</span></em>, <em class="sig-param"><span class="n">condition</span></em>, <em class="sig-param"><span class="n">time</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="isoplot.plots.Plot.HEIGHT">
+<code class="sig-name descname">HEIGHT</code><em class="property"> = 640</em><a class="headerlink" href="#isoplot.plots.Plot.HEIGHT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="isoplot.plots.Plot.WIDTH">
+<code class="sig-name descname">WIDTH</code><em class="property"> = 1080</em><a class="headerlink" href="#isoplot.plots.Plot.WIDTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.Plot.split_ids">
+<em class="property">static </em><code class="sig-name descname">split_ids</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ids</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.Plot.split_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to split IDs and get back lists of conditions, times and replicates in order</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ids</strong> (<em>list</em>) – IDs generated by IsoplotData Object</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>lists containing conditions, times and replicates</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>lists</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="isoplot.plots.StaticPlot">
+<em class="property">class </em><code class="sig-prename descclassname">isoplot.plots.</code><code class="sig-name descname">StaticPlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolite</span></em>, <em class="sig-param"><span class="n">condition</span></em>, <em class="sig-param"><span class="n">time</span></em>, <em class="sig-param"><span class="n">fmt</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#isoplot.plots.Plot" title="isoplot.plots.Plot"><code class="xref py py-class docutils literal notranslate"><span class="pre">isoplot.plots.Plot</span></code></a></p>
+<p>Class to generate the different static plots.</p>
+<dl class="py method">
+<dt id="isoplot.plots.StaticPlot.barplot">
+<code class="sig-name descname">barplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.barplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation of barplots</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.StaticPlot.mean_barplot">
+<code class="sig-name descname">mean_barplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.mean_barplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation of meaned barplots (on replicates)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.StaticPlot.mean_enrichment_meanplot">
+<code class="sig-name descname">mean_enrichment_meanplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.mean_enrichment_meanplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate static mean_enrichment plots with meaned replicates</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.StaticPlot.mean_enrichment_plot">
+<code class="sig-name descname">mean_enrichment_plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.mean_enrichment_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate static mean_enrichment plots</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="isoplot.plots.StaticPlot.stacked_areaplot">
+<code class="sig-name descname">stacked_areaplot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.plots.StaticPlot.stacked_areaplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creation of area stackplot (for cinetic data)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-isoplot.isoplotcli">
+<span id="isoplotcli-py"></span><h2><code class="file docutils literal notranslate"><span class="pre">isoplotcli.py</span></code><a class="headerlink" href="#module-isoplot.isoplotcli" title="Permalink to this headline">¶</a></h2>
+<p>Isoplot2 cli module containing argument parser, cli initialization and main logger creation.</p>
+<dl class="py function">
+<dt id="isoplot.isoplotcli.initialize_cli">
+<code class="sig-prename descclassname">isoplot.isoplotcli.</code><code class="sig-name descname">initialize_cli</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplotcli.initialize_cli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize parser and call main function</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplotcli.main">
+<code class="sig-prename descclassname">isoplot.isoplotcli.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em>, <em class="sig-param"><span class="n">logger</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplotcli.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function responsible for directory creation, launching plot creation
+and coordinating different modules. Can be put in a separate module if the need
+ever arises (if a GUI is created for example).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>list of arguments</em>) – List of strings to parse. The default is taken from sys.argv</p></li>
+<li><p><strong>logger</strong> (<em>class: 'logging.Logger'</em>) – main logger that will be derived in other modules</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>RuntimeError</strong> – if inputed destination path does not exist raises error</p></li>
+<li><p><strong>RuntimeError</strong> – if inputed template path does not exist raises error</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-isoplot.isoplot_notebook">
+<span id="isoplot-notebook-py"></span><h2><code class="file docutils literal notranslate"><span class="pre">isoplot_notebook.py</span></code><a class="headerlink" href="#module-isoplot.isoplot_notebook" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="isoplot.isoplot_notebook.ValueHolder">
+<em class="property">class </em><code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">ValueHolder</code><a class="headerlink" href="#isoplot.isoplot_notebook.ValueHolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="isoplot.isoplot_notebook.ValueHolder.x">
+<code class="sig-name descname">x</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#isoplot.isoplot_notebook.ValueHolder.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplot_notebook.build_map">
+<code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">build_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">map_select</span></em>, <em class="sig-param"><span class="n">annot</span></em>, <em class="sig-param"><span class="n">fmt</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplot_notebook.build_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplot_notebook.dataprep_eventhandler">
+<code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">dataprep_eventhandler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplot_notebook.dataprep_eventhandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplot_notebook.indibokplot">
+<code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">indibokplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolites</span></em>, <em class="sig-param"><span class="n">conditions</span></em>, <em class="sig-param"><span class="n">times</span></em>, <em class="sig-param"><span class="n">stackplot</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplot_notebook.indibokplot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplot_notebook.indiplot">
+<code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">indiplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolites</span></em>, <em class="sig-param"><span class="n">conditions</span></em>, <em class="sig-param"><span class="n">times</span></em>, <em class="sig-param"><span class="n">fmt</span></em>, <em class="sig-param"><span class="n">stackplot</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplot_notebook.indiplot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplot_notebook.make_mduploader">
+<code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">make_mduploader</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplot_notebook.make_mduploader" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplot_notebook.make_uploader">
+<code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">make_uploader</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplot_notebook.make_uploader" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplot_notebook.meanbokplot">
+<code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">meanbokplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolites</span></em>, <em class="sig-param"><span class="n">conditions</span></em>, <em class="sig-param"><span class="n">times</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplot_notebook.meanbokplot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplot_notebook.meanplot">
+<code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">meanplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stack</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">metabolites</span></em>, <em class="sig-param"><span class="n">conditions</span></em>, <em class="sig-param"><span class="n">times</span></em>, <em class="sig-param"><span class="n">fmt</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplot_notebook.meanplot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.isoplot_notebook.metadatabtn_eventhandler">
+<code class="sig-prename descclassname">isoplot.isoplot_notebook.</code><code class="sig-name descname">metadatabtn_eventhandler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.isoplot_notebook.metadatabtn_eventhandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-isoplot.utilities">
+<span id="utilities-py"></span><h2><code class="file docutils literal notranslate"><span class="pre">utilities.py</span></code><a class="headerlink" href="#module-isoplot.utilities" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="isoplot.utilities.control_isoplot_map">
+<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">control_isoplot_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em>, <em class="sig-param"><span class="n">data_object</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.control_isoplot_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to control which map methods are called depending on the
+arguments that were parsed</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.utilities.control_isoplot_plot">
+<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">control_isoplot_plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em>, <em class="sig-param"><span class="n">data_object</span></em>, <em class="sig-param"><span class="n">metabolite</span></em>, <em class="sig-param"><span class="n">conditions</span></em>, <em class="sig-param"><span class="n">times</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.control_isoplot_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to control which plot methods are called depending on the
+arguments that were parsed</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.utilities.get_cli_input">
+<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">get_cli_input</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arg</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">data_object</span></em>, <em class="sig-param"><span class="n">logger</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.get_cli_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to get input from user and check for errors in spelling.
+If an error is detected input is asked once more.
+This function is used for galaxy implementation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arg</strong> (<em>list</em>) – list from which strings must be parsed</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – name of what we are looking for</p></li>
+<li><p><strong>data_object</strong> (<em>class: 'isoplot.dataprep.IsoplotData'</em>) – IsoplotData object containing final clean dataframe</p></li>
+<li><p><strong>logger</strong> (<em>class: 'logging.Logger'</em>) – Logger object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Desired string after parsing</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.utilities.get_local_cli_input">
+<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">get_local_cli_input</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">data_object</span></em>, <em class="sig-param"><span class="n">logger</span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.get_local_cli_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to get input from user and check for errors in spelling.
+If an error is detected input is asked once more.
+This function is used for local implementation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – name of what we are looking for</p></li>
+<li><p><strong>data_object</strong> (<em>class: 'isoplot.dataprep.IsoplotData'</em>) – IsoplotData object containing final clean dataframe</p></li>
+<li><p><strong>logger</strong> (<em>class: 'logging.Logger'</em>) – Logger object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Desired string after parsing</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="isoplot.utilities.parseArgs">
+<code class="sig-prename descclassname">isoplot.utilities.</code><code class="sig-name descname">parseArgs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoplot.utilities.parseArgs" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Argument Parser object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>class: argparse.ArgumentParser</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -493,35 +556,28 @@ not .xlsx or encoding is not utf-8</p></li>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="definitions.html" class="btn btn-neutral float-left" title="Definitions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="definitions.html" class="btn btn-neutral float-left" title="Definitions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Loïc LE GREGAM
+        &#169; Copyright 2020, Loïc LE GREGAM.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
