@@ -125,7 +125,7 @@ class IsoplotData:
             self.isoplot_logger.error(
                 'Merge impossible. Check column headers or file format (format must be .xlsx)')
             raise
-
+            
         else:
             self.isoplot_logger.info('Dataframes have been merged')
 
@@ -138,6 +138,7 @@ class IsoplotData:
         self.dfmerge['metabolite'].drop_duplicates()
 
         self.isoplot_logger.debug("Creating IDs...")
+
         # Nous créons ici une colonne pour identifier chaque ligne avec condition+temps+numero de répétition (possibilité de rajouter un tag metabolite plus tard si besoin)
         self.dfmerge['ID'] = self.dfmerge['condition'].apply(str) + '_T' + self.dfmerge['time'].apply(str) + '_' + \
                              self.dfmerge['number_rep'].apply(str)

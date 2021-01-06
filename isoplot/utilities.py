@@ -110,7 +110,7 @@ def control_isoplot_plot(args, data_object, metabolite, conditions, times):
 
     elif args.interactive_stacked_barplot:
         interactive_plot.stacked_barplot()
-
+        
     elif args.interactive_stacked_barplot and not args.stack:
         interactive_plot.unstacked_barplot()
 

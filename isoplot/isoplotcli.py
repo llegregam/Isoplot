@@ -79,7 +79,7 @@ def main(args, logger):
 
     # If template is not given, we generate it and stop here
     if args.template == 0:
-
+      
         logger.debug("Generating template")
         data_object.generate_template()
         logger.info("Template has been generated. Check destination folder at {}".format(args.destination))
@@ -125,7 +125,7 @@ def main(args, logger):
         logger.info("conditions: {}".format(conditions))
         logger.info("times: {}".format(times))
         logger.info("--------------------")
-
+        
         logger.info("Creating plots...")
 
         # Finally we call the function that coordinates the plot creation

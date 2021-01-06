@@ -68,6 +68,7 @@ class Plot:
         :return: lists containing conditions, times and replicates
         :rtype: lists
         """
+
         
         count = ids[0].count('_')
         
@@ -484,7 +485,7 @@ class InteractivePlot(Plot):
         
         #Nous récupérons les noms pour les tooltips
         conditions, times, replicates = Plot.split_ids(my_x_range)
-        
+
         #Nous faisons ici des listes avec les données pour chaque couche (une couche=un isotopologue)
         listoflists =[mydatapivot[val].tolist() for val in stackers]
 
@@ -551,8 +552,7 @@ class InteractivePlot(Plot):
         
         #Nous récupérons les noms pour les tooltips
         conditions, times, replicates = Plot.split_ids(condition_time)
-        
-        
+
         #Nous récupérons les valeurs de chaque couche
         tops = [row[int(stack)+1] 
                 for row in mydatapivot.itertuples() 

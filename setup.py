@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 import re
 
-
 def open_readme_file():
     with open('README.rst') as f:
 	     data = f.read()
