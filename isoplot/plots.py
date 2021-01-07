@@ -19,8 +19,8 @@ except Exception as err:
 else:
     if __name__ == '__main__':
         print("Modules have been loaded")
-        
-        
+
+
 class Plot:
     """
     Plot objects Master Class from which the rest inherit
@@ -43,7 +43,7 @@ class Plot:
 
     WIDTH = 1080
     HEIGHT = 640
-    
+
     def __init__(self, stack, value, data, name, metabolite, condition, time):
 
         self.stack = stack
@@ -52,10 +52,10 @@ class Plot:
         self.name = name
         self.metabolite = metabolite
         self.condition = condition
-        self.time = time     
+        self.time = time
         self.filtered_data = self.data[
-            (self.data['metabolite'] == self.metabolite) & 
-            (self.data['condition'].isin(self.condition)) & 
+            (self.data['metabolite'] == self.metabolite) &
+            (self.data['condition'].isin(self.condition)) &
             (self.data['time'].isin(self.time))]
 
     @staticmethod
@@ -69,34 +69,33 @@ class Plot:
         :rtype: lists
         """
 
-        
         count = ids[0].count('_')
-        
+
         if count == 2:
-            
+
             conditions, times, replicates = [], [], []
-            
+
             for i in ids:
                 c, t, r = i.split("_")
                 conditions.append(c)
                 times.append(t)
                 replicates.append(r)
-            
+
             return conditions, times, replicates
-        
+
         if count == 1:
-            
+
             conditions, times = [], []
-            
+
             for i in ids:
                 c, t = i.split("_")
                 conditions.append(c)
                 times.append(t)
-                
+
             return conditions, times
-        
+
         else:
-            
+
             raise ValueError('Number of underscores is different from 2 or 3')
 
 
@@ -110,22 +109,21 @@ class StaticPlot(Plot):
     :type display: Bool
     """
 
-    def __init__(self, stack, value, data, name, metabolite, 
+    def __init__(self, stack, value, data, name, metabolite,
                  condition, time, fmt, display=False):
         """
 
         """
-        
+
         super().__init__(stack, value, data, name, metabolite, condition, time)
         self.fmt = fmt
         self.static_fig_name = self.metabolite + '.' + self.fmt
         self.display = display
-            
-    
+
     def stacked_areaplot(self):
         """Creation of area stackplot (for cinetic data)"""
-        
-        #Commençons par la préparation de data
+
+        # Commençons par la préparation de data
         stackpivot = self.filtered_data.pivot(
             index='ID', columns='isotopologue', values=self.value)
         stackpivot = stackpivot.reindex(index=natsorted(stackpivot.index))
@@ -133,12 +131,12 @@ class StaticPlot(Plot):
         stackyval = pivotcol.transpose()
         stackxval = stackpivot.index.to_numpy()
 
-        #Passons au plot
-        plt.figure(figsize=[38,20])
+        # Passons au plot
+        plt.figure(figsize=[38, 20])
         labels = list(stackpivot.columns)
-        plt.stackplot(stackxval, 
-                      stackyval, 
-                      labels=labels, 
+        plt.stackplot(stackxval,
+                      stackyval,
+                      labels=labels,
                       colors=cc.glasbey_dark[:len(
                           self.data['isotopologue'].unique())])
         plt.legend()
@@ -155,28 +153,28 @@ class StaticPlot(Plot):
 
     def barplot(self):
         """Creation of barplots"""
-        
-        #Nous filtrons et préparons la table pour les donnéees
+
+        # Nous filtrons et préparons la table pour les donnéees
         mydata = self.filtered_data
-        mydatapivot = mydata.pivot_table(index=["condition_order",'ID'], 
-                                         columns='isotopologue', 
-                                         values=self.value )
-        
-        #Ici nous mettons les données dans l'ordre choisi par le template
-        mydatapivot.sort_index(level="condition_order", inplace=True) 
-        mydatapivot = mydatapivot.droplevel(level = "condition_order")
-        
-        #Passons au plot
+        mydatapivot = mydata.pivot_table(index=["condition_order", 'ID'],
+                                         columns='isotopologue',
+                                         values=self.value)
+
+        # Ici nous mettons les données dans l'ordre choisi par le template
+        mydatapivot.sort_index(level="condition_order", inplace=True)
+        mydatapivot = mydatapivot.droplevel(level="condition_order")
+
+        # Passons au plot
         sns.set_context("poster")
-        ax = mydatapivot.plot.bar(stacked=self.stack, 
-                                  figsize=(30,15), 
-                                  title=self.metabolite, 
+        ax = mydatapivot.plot.bar(stacked=self.stack,
+                                  figsize=(30, 15),
+                                  title=self.metabolite,
                                   color=cc.glasbey_dark[:len(
                                       self.data['isotopologue'].unique())])
         ax.set_xlabel('Condition, Time and Replicate')
         ax.set_ylabel(self.value)
-        ax.set_xticklabels(ax.get_xticklabels(), 
-                           rotation=45, 
+        ax.set_xticklabels(ax.get_xticklabels(),
+                           rotation=45,
                            horizontalalignment='right')
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.tight_layout()
@@ -186,36 +184,34 @@ class StaticPlot(Plot):
         else:
             plt.close()
 
-
     def mean_barplot(self):
         """Creation of meaned barplots (on replicates)"""
-         
-        
-        #Ici nous faisons les moyennes et les SD des données et nous les mettons dans un df
+
+        # Ici nous faisons les moyennes et les SD des données et nous les mettons dans un df
         df_replicate_mean = self.filtered_data.groupby(
             ["condition_order", "condition", "time", "isotopologue"])[self.value].mean()
         df_replicate_std = self.filtered_data.groupby(
             ["condition_order", "condition", "time", "isotopologue"])[self.value].std()
-        df_full = pd.concat([df_replicate_mean, df_replicate_std],  axis=1)
+        df_full = pd.concat([df_replicate_mean, df_replicate_std], axis=1)
         df_full.columns = ("mean", "std")
-        
-        #Nous formattons le df pour pouvoir plotter
+
+        # Nous formattons le df pour pouvoir plotter
         df_ready = df_full.unstack()
         df_ready.sort_index(level="condition_order", inplace=True)
-        df_ready = df_ready.droplevel(level = "condition_order")
-    
-        #Passons au plot
+        df_ready = df_ready.droplevel(level="condition_order")
+
+        # Passons au plot
         sns.set_context("poster")
         colors = cc.glasbey_dark[:len(df_ready.columns)]
-        this_ax = df_ready["mean"].plot.bar(stacked=self.stack, 
-                                            yerr=df_ready['std'], 
-                                            figsize=(30,15), 
-                                            title=self.metabolite, 
+        this_ax = df_ready["mean"].plot.bar(stacked=self.stack,
+                                            yerr=df_ready['std'],
+                                            figsize=(30, 15),
+                                            title=self.metabolite,
                                             color=colors)
         this_ax.set_xlabel('Condition, Time and Replicate')
         this_ax.set_ylabel(self.value)
-        this_ax.set_xticklabels(this_ax.get_xticklabels(), 
-                                rotation=45, 
+        this_ax.set_xticklabels(this_ax.get_xticklabels(),
+                                rotation=45,
                                 horizontalalignment='right')
         this_ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.xticks(rotation=45)
@@ -228,28 +224,28 @@ class StaticPlot(Plot):
 
     def mean_enrichment_plot(self):
         """Generate static mean_enrichment plots"""
-         
-        #Nous préparons une liste et un df dans lesquels on va ajouter les mean_enrichment
+
+        # Nous préparons une liste et un df dans lesquels on va ajouter les mean_enrichment
         list_of_tmpdfs = []
-        
-        #Nous retirons les duplicats pour chaque ID individuel
+
+        # Nous retirons les duplicats pour chaque ID individuel
         for ID in self.filtered_data["ID"].drop_duplicates():
             tmpdf = self.filtered_data[self.filtered_data["ID"] == ID].drop_duplicates(
                 subset=['mean_enrichment'])
             list_of_tmpdfs.append(tmpdf)
-            
-        #Nous mettons l'ordre de conditions en fonction du template, et nous préparons les datas pour plotter
+
+        # Nous mettons l'ordre de conditions en fonction du template, et nous préparons les datas pour plotter
         mean_enrichment_df = pd.concat(list_of_tmpdfs, ignore_index=True)
         mean_enrichment_df = mean_enrichment_df[["ID", "condition_order", "mean_enrichment"]]
         mean_enrichment_df.sort_values(by="condition_order", inplace=True)
-        mean_enrichment_df.drop(labels="condition_order", axis = 1, inplace=True)
+        mean_enrichment_df.drop(labels="condition_order", axis=1, inplace=True)
         mean_enrichment_df.set_index("ID", inplace=True)
-        
-        #Nous plottons les data avec la fonction de pandas
+
+        # Nous plottons les data avec la fonction de pandas
         sns.set_context("poster")
-        ax = mean_enrichment_df.plot.bar(figsize=(30,15),
-                                        title=self.metabolite, 
-                                        color=cc.glasbey_dark[3])
+        ax = mean_enrichment_df.plot.bar(figsize=(30, 15),
+                                         title=self.metabolite,
+                                         color=cc.glasbey_dark[3])
         ax.set_xlabel('Condition, Time and Replicate')
         ax.set_ylabel("mean_enrichment")
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
@@ -264,39 +260,39 @@ class StaticPlot(Plot):
     def mean_enrichment_meanplot(self):
         """Generate static mean_enrichment plots with meaned replicates"""
 
-        #Nous préparons une liste et un df dans lesquels on va ajouter les mean_enrichment
+        # Nous préparons une liste et un df dans lesquels on va ajouter les mean_enrichment
         list_of_tmpdfs = []
-        
-        #Nous retirons les duplicats pour chaque ID individuel
+
+        # Nous retirons les duplicats pour chaque ID individuel
         for ID in self.filtered_data["ID"].drop_duplicates():
             tmpdf = self.filtered_data[
                 self.filtered_data["ID"] == ID].drop_duplicates(subset=['mean_enrichment'])
             list_of_tmpdfs.append(tmpdf)
         mean_enrichment_df = pd.concat(list_of_tmpdfs, ignore_index=True)
 
-        #Ici nous faisons les moyennes et les SD des données et nous les mettons dans un df
+        # Ici nous faisons les moyennes et les SD des données et nous les mettons dans un df
         df_replicate_mean = mean_enrichment_df.groupby(
             ["condition_order", "condition", "time", "isotopologue"])['mean_enrichment'].mean()
         df_replicate_std = mean_enrichment_df.groupby(
             ["condition_order", "condition", "time", "isotopologue"])['mean_enrichment'].std()
-        df_full = pd.concat([df_replicate_mean, df_replicate_std],  axis=1)
+        df_full = pd.concat([df_replicate_mean, df_replicate_std], axis=1)
         df_full.columns = ("mean", "std")
-        
-        #Nous formattons le df pour pouvoir plotter
+
+        # Nous formattons le df pour pouvoir plotter
         df_ready = df_full.unstack()
         df_ready.sort_index(level="condition_order", inplace=True)
-        df_ready = df_ready.droplevel(level = "condition_order")
+        df_ready = df_ready.droplevel(level="condition_order")
 
-        #Passons au plot
+        # Passons au plot
         sns.set_context("poster")
-        this_ax = df_ready["mean"].plot.bar(yerr=df_ready['std'], 
-                                            figsize=(30,15), 
-                                            title=self.metabolite, 
+        this_ax = df_ready["mean"].plot.bar(yerr=df_ready['std'],
+                                            figsize=(30, 15),
+                                            title=self.metabolite,
                                             color=cc.glasbey_dark[3])
         this_ax.set_xlabel('Condition, Time and Replicate')
         this_ax.set_ylabel('mean_enrichment')
-        this_ax.set_xticklabels(this_ax.get_xticklabels(), 
-                                rotation=45, 
+        this_ax.set_xticklabels(this_ax.get_xticklabels(),
+                                rotation=45,
                                 horizontalalignment='right')
         this_ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.xticks(rotation=45)
@@ -306,41 +302,41 @@ class StaticPlot(Plot):
             plt.show()
         else:
             plt.close()
-            
+
+
 class InteractivePlot(Plot):
     """Class to generate the different interactive plots"""
 
     def __init__(self, stack, value, data, name, metabolite, condition, time):
 
         super().__init__(stack, value, data, name, metabolite, condition, time)
-        self.filename = self.metabolite + ".html" 
+        self.filename = self.metabolite + ".html"
         self.plot_tools = "save, wheel_zoom, reset, hover, pan"
-        
 
     def mean_enrichment_plot(self):
         """Generate interactive mean_enrichment plots"""
-        
-        output_file(filename = self.metabolite + ".html", title = self.metabolite)
 
-        #Nous filtrons les données en fonction des paramètres du dashboard
+        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+
+        # Nous filtrons les données en fonction des paramètres du dashboard
         tmpdf = self.filtered_data
-        
-        #Nous préparons une liste et un df dans lesquels on va ajouter les mean_enrichment
+
+        # Nous préparons une liste et un df dans lesquels on va ajouter les mean_enrichment
         list_of_tmpdfs = []
-        
-        #Nous retirons les duplicats pour chaque ID individuel
+
+        # Nous retirons les duplicats pour chaque ID individuel
         for ID in tmpdf["ID"].drop_duplicates():
             tmpdf2 = tmpdf[tmpdf["ID"] == ID].drop_duplicates(subset=['mean_enrichment'])
             list_of_tmpdfs.append(tmpdf2)
-            
-        #Nous mettons l'ordre de conditions en fonction du template, et nous préparons les datas pour plotter
+
+        # Nous mettons l'ordre de conditions en fonction du template, et nous préparons les datas pour plotter
         mean_enrichment_df = pd.concat(list_of_tmpdfs, ignore_index=True)
-        
+
         del list_of_tmpdfs
-        
+
         mean_enrichment_df = mean_enrichment_df[["ID", "condition_order", "mean_enrichment"]]
         mean_enrichment_df.sort_values(by="condition_order", inplace=True)
-        mean_enrichment_df.drop(labels="condition_order", axis = 1, inplace=True)
+        mean_enrichment_df.drop(labels="condition_order", axis=1, inplace=True)
         mean_enrichment_df.set_index("ID", inplace=True)
 
         my_x_range = mean_enrichment_df.index.tolist()
@@ -352,36 +348,36 @@ class InteractivePlot(Plot):
                                                  reps=replicates))
 
         TOOLTIPS = [
-        ("Condition", "@conds"),
-        ("Time", "@times"),
-        ("Replicate", "@reps"),
-        ("Value", "@y")
+            ("Condition", "@conds"),
+            ("Time", "@times"),
+            ("Replicate", "@reps"),
+            ("Value", "@y")
         ]
 
         myplot = figure(plot_width=self.WIDTH,
-                       plot_height=self.HEIGHT,
-                       title=self.name,
-                       y_axis_label="mean_enrichment",
-                       tools=self.plot_tools,
-                       tooltips = TOOLTIPS,
-                       x_range=my_x_range)
+                        plot_height=self.HEIGHT,
+                        title=self.name,
+                        y_axis_label="mean_enrichment",
+                        tools=self.plot_tools,
+                        tooltips=TOOLTIPS,
+                        x_range=my_x_range)
 
         myplot.vbar(width=0.9,
-                   bottom=0,
-                   top="y",
-                   color=cc.glasbey_dark[3],
-                   x="x",
-                   source=source)
+                    bottom=0,
+                    top="y",
+                    color=cc.glasbey_dark[3],
+                    x="x",
+                    source=source)
 
-        myplot.xaxis.major_label_orientation = math.pi/4
+        myplot.xaxis.major_label_orientation = math.pi / 4
         show(myplot)
 
     def mean_enrichment_meanplot(self):
         """Generate interactive mean_enrichment plots with meaned replicates"""
-        
-        output_file(filename = self.metabolite +".html", title = self.metabolite)
 
-        #Nous filtrons les données en fonction des paramètres du dashboard
+        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+
+        # Nous filtrons les données en fonction des paramètres du dashboard
         tmpdf = self.filtered_data
 
         df_replicate_mean = tmpdf.groupby(
@@ -391,36 +387,36 @@ class InteractivePlot(Plot):
         mean_df = df_replicate_mean.to_frame()
         std_df = df_replicate_std.to_frame()
 
-        #Ici nous mettons les moyennes dans un df et nous trions dans l'ordre demandé dans le template
+        # Ici nous mettons les moyennes dans un df et nous trions dans l'ordre demandé dans le template
         mean_df_unstack = mean_df.unstack()
         mean_df_unstack.sort_index(level="condition_order", inplace=True)
-        mean_df_unstack = mean_df_unstack.droplevel(level = 0)
-        mean_df_unstack.columns = mean_df_unstack.columns.droplevel(level = 0)
+        mean_df_unstack = mean_df_unstack.droplevel(level=0)
+        mean_df_unstack.columns = mean_df_unstack.columns.droplevel(level=0)
         mean_df_unstack.columns = mean_df_unstack.columns.astype(str)
-        mean_df_unstack.index = ['{}_{}'.format(i, j) for i, j in mean_df_unstack.index] #Nous recréons la colonne ID
+        mean_df_unstack.index = ['{}_{}'.format(i, j) for i, j in mean_df_unstack.index]  # Nous recréons la colonne ID
 
-        #Les colonnes contenants toutes les mêmes valeurs, nous pouvons juste prendre la première
+        # Les colonnes contenants toutes les mêmes valeurs, nous pouvons juste prendre la première
         mean_series = mean_df_unstack.iloc[:, 0].copy()
 
-        #Ici nous mettons les SD dans un df et nous trions dans l'ordre demandé dans le template
+        # Ici nous mettons les SD dans un df et nous trions dans l'ordre demandé dans le template
         std_df_unstack = std_df.unstack()
         std_df_unstack.sort_index(level="condition_order", inplace=True)
-        std_df_unstack = std_df_unstack.droplevel(level = 0)
-        std_df_unstack.columns = std_df_unstack.columns.droplevel(level = 0)
+        std_df_unstack = std_df_unstack.droplevel(level=0)
+        std_df_unstack.columns = std_df_unstack.columns.droplevel(level=0)
         std_df_unstack.columns = std_df_unstack.columns.astype(str)
         std_df_unstack.index = ['{}_{}'.format(i, j) for i, j in std_df_unstack.index]
 
-        #Les colonnes contenants toutes les mêmes valeurs, nous pouvons juste prendre la première
+        # Les colonnes contenants toutes les mêmes valeurs, nous pouvons juste prendre la première
         std_series = std_df_unstack.iloc[:, 0].copy()
 
-        #Nous préparons les hauts et bas pour placer les barres d'erreur
+        # Nous préparons les hauts et bas pour placer les barres d'erreur
         upper_series = mean_series.add(std_series, fill_value=0)
         upper_list = upper_series.to_list()
 
         lower_series = mean_series.sub(std_series, axis='index', fill_value=0)
         lower_list = lower_series.to_list()
 
-        #Nous préparons les datas pour plotter
+        # Nous préparons les datas pour plotter
         my_x_range = mean_series.index.tolist()
         values = mean_series.to_list()
         conditions, times, replicates = Plot.split_ids(my_x_range)
@@ -429,183 +425,182 @@ class InteractivePlot(Plot):
                        reps=replicates)
         source = bk.models.ColumnDataSource(my_dict)
 
-        #Nous préparons le dictionnaire qui va faire le ColumnDataSource pour les barres d'erreur
-        whisker_dico = dict(base = my_x_range, upper = upper_list, lower = lower_list)
+        # Nous préparons le dictionnaire qui va faire le ColumnDataSource pour les barres d'erreur
+        whisker_dico = dict(base=my_x_range, upper=upper_list, lower=lower_list)
 
-        #Passons au plot
+        # Passons au plot
         TOOLTIPS = [
-        ("Condition", "@conds"),
-        ("Time", "@times"),
-        ("Replicate", "@reps"),
-        ("Value", "@tops")
+            ("Condition", "@conds"),
+            ("Time", "@times"),
+            ("Replicate", "@reps"),
+            ("Value", "@tops")
         ]
 
         myplot = figure(plot_width=self.WIDTH,
-                       plot_height=self.HEIGHT,
-                       title=self.name,
-                       y_axis_label="mean_enrichment",
-                       tools=self.plot_tools,
-                       tooltips = TOOLTIPS,
-                       x_range=my_x_range)
+                        plot_height=self.HEIGHT,
+                        title=self.name,
+                        y_axis_label="mean_enrichment",
+                        tools=self.plot_tools,
+                        tooltips=TOOLTIPS,
+                        x_range=my_x_range)
 
         myplot.vbar(width=0.9,
-                   bottom=0,
-                   top='tops',
-                   color=cc.glasbey_dark[3],
-                   x='ID',
-                   source = source)
+                    bottom=0,
+                    top='tops',
+                    color=cc.glasbey_dark[3],
+                    x='ID',
+                    source=source)
 
-        mywhisker = bk.models.Whisker(source = bk.models.ColumnDataSource(whisker_dico), 
-                                      base = "base", 
-                                      upper = "upper", 
-                                      lower = "lower", 
+        mywhisker = bk.models.Whisker(source=bk.models.ColumnDataSource(whisker_dico),
+                                      base="base",
+                                      upper="upper",
+                                      lower="lower",
                                       level="overlay")
 
-        #Nous ajoutons les barres d'erreurs
+        # Nous ajoutons les barres d'erreurs
         myplot.add_layout(mywhisker)
 
-        myplot.xaxis.major_label_orientation = math.pi/4
+        myplot.xaxis.major_label_orientation = math.pi / 4
         show(myplot)
 
     def stacked_barplot(self):
         """Generate interactive stacked barplots"""
-        
-        output_file(filename = self.metabolite +".html", title = self.metabolite)
 
-        #Nous filtrons les datas à plotter
+        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+
+        # Nous filtrons les datas à plotter
         mydata = self.filtered_data
-        mydatapivot = mydata.pivot_table(index=["condition_order",'ID'],
-                                         columns='isotopologue', 
-                                         values=self.value )
+        mydatapivot = mydata.pivot_table(index=["condition_order", 'ID'],
+                                         columns='isotopologue',
+                                         values=self.value)
         mydatapivot.sort_index(level="condition_order", inplace=True)
-        mydatapivot = mydatapivot.droplevel(level = "condition_order")
+        mydatapivot = mydatapivot.droplevel(level="condition_order")
         mydatapivot.columns = mydatapivot.columns.astype(str)
 
-        #préparons les différentes couches des barres à stacker
+        # préparons les différentes couches des barres à stacker
         stackers = mydatapivot.columns.tolist()
-        
-        #Récupérons les noms à mettre en x
+
+        # Récupérons les noms à mettre en x
         my_x_range = mydatapivot.index.tolist()
-        
-        #Nous récupérons les noms pour les tooltips
+
+        # Nous récupérons les noms pour les tooltips
         conditions, times, replicates = Plot.split_ids(my_x_range)
 
-        #Nous faisons ici des listes avec les données pour chaque couche (une couche=un isotopologue)
-        listoflists =[mydatapivot[val].tolist() for val in stackers]
+        # Nous faisons ici des listes avec les données pour chaque couche (une couche=un isotopologue)
+        listoflists = [mydatapivot[val].tolist() for val in stackers]
 
-        #Nous mettons ça dans un dictionnaire pour le ColumnDataSource
+        # Nous mettons ça dans un dictionnaire pour le ColumnDataSource
         myplotdic = dict(zip(stackers, listoflists))
-        myplotdic.update({'ID' : my_x_range,
-                          'conds' : conditions,
-                          'times' : times,
-                          'reps' : replicates})
+        myplotdic.update({'ID': my_x_range,
+                          'conds': conditions,
+                          'times': times,
+                          'reps': replicates})
 
-        #Préparation des tooltips
+        # Préparation des tooltips
         TOOLTIPS = [
             ("Condition", "@conds"),
             ('Time', '@times'),
             ('Replicate', '@reps'),
             ("Isotopologue", "$name"),
             ("Value", "@$name"),
-            ]
+        ]
 
-        #Initialization de la figure
+        # Initialization de la figure
         myplot = figure(
-            x_range = my_x_range,
-            plot_width = self.WIDTH,
-            plot_height = self.HEIGHT,
-            title = self.name,
-            y_axis_label = self.value,
-            tools = self.plot_tools, 
-            tooltips = TOOLTIPS
+            x_range=my_x_range,
+            plot_width=self.WIDTH,
+            plot_height=self.HEIGHT,
+            title=self.name,
+            y_axis_label=self.value,
+            tools=self.plot_tools,
+            tooltips=TOOLTIPS
         )
 
-        #Passons au plot
-        myplot.vbar_stack(stackers, 
-        x='ID', 
-        source=myplotdic,
-        width=0.9,
-        color=cc.glasbey_dark[:len(stackers)]
-        )
+        # Passons au plot
+        myplot.vbar_stack(stackers,
+                          x='ID',
+                          source=myplotdic,
+                          width=0.9,
+                          color=cc.glasbey_dark[:len(stackers)]
+                          )
 
-        myplot.xaxis.major_label_orientation = math.pi/4
+        myplot.xaxis.major_label_orientation = math.pi / 4
 
         show(myplot)
 
-
     def unstacked_barplot(self):
         """Generate interactive unstacked barplots"""
-        
-        output_file(filename = self.metabolite +".html", title = self.metabolite)
 
-        #Nous filtrons les datas à plotter
+        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+
+        # Nous filtrons les datas à plotter
         mydata = self.filtered_data
-        mydatapivot = mydata.pivot_table(index=["condition_order",'ID'], 
-                                         columns='isotopologue', 
-                                         values=self.value )
+        mydatapivot = mydata.pivot_table(index=["condition_order", 'ID'],
+                                         columns='isotopologue',
+                                         values=self.value)
         mydatapivot.sort_index(level="condition_order", inplace=True)
-        mydatapivot = mydatapivot.droplevel(level = "condition_order")
-        
-        #Nous récupérons les colonnes pour faire les couches à stacker 
+        mydatapivot = mydatapivot.droplevel(level="condition_order")
+
+        # Nous récupérons les colonnes pour faire les couches à stacker
         stackers = mydatapivot.columns.astype(str).tolist()
-        
-        #Nous faisons des tuples avec index et couche à plotter
-        factors= [(i, stack) for i in mydatapivot.index for stack in stackers]
+
+        # Nous faisons des tuples avec index et couche à plotter
+        factors = [(i, stack) for i in mydatapivot.index for stack in stackers]
         condition_time = [i[0] for i in factors]
         isotops = [i[1] for i in factors]
-        
-        #Nous récupérons les noms pour les tooltips
+
+        # Nous récupérons les noms pour les tooltips
         conditions, times, replicates = Plot.split_ids(condition_time)
 
-        #Nous récupérons les valeurs de chaque couche
-        tops = [row[int(stack)+1] 
-                for row in mydatapivot.itertuples() 
+        # Nous récupérons les valeurs de chaque couche
+        tops = [row[int(stack) + 1]
+                for row in mydatapivot.itertuples()
                 for stack in stackers]
-        
-        #Nous mettons tout ça dans un ColumnDataSource
+
+        # Nous mettons tout ça dans un ColumnDataSource
         source = bk.models.ColumnDataSource(data=dict(
             x=factors, tops=tops, conds=conditions,
-            times = times, reps = replicates, isotops=isotops))
+            times=times, reps=replicates, isotops=isotops))
 
-        #Préparation des tooltips
+        # Préparation des tooltips
         TOOLTIPS = [
             ("Condition", "@conds"),
             ("Time", '@times'),
             ("Replicate", "@reps"),
             ('Isotopologue', '@isotops'),
             ("Value", "@tops")
-            ]
+        ]
 
-        #Initialisation de la figure
+        # Initialisation de la figure
         plot = figure(
-        x_range= bk.models.FactorRange(*factors), #Voir docu sur Bokeh.org pour ça
-        plot_width=self.WIDTH, 
-        plot_height=self.HEIGHT, 
-        tools=self.plot_tools, 
-        tooltips=TOOLTIPS)
+            x_range=bk.models.FactorRange(*factors),  # Voir docu sur Bokeh.org pour ça
+            plot_width=self.WIDTH,
+            plot_height=self.HEIGHT,
+            tools=self.plot_tools,
+            tooltips=TOOLTIPS)
 
-        #Passons au plot
-        plot.vbar(x='x', 
-                  top='tops', 
-                  width=0.9, 
-                  source=source, 
-                  fill_color = bk.transform.factor_cmap('x', 
-                                                        palette=cc.glasbey_dark, 
-                                                        factors=stackers, 
-                                                        start=1, end=2),
+        # Passons au plot
+        plot.vbar(x='x',
+                  top='tops',
+                  width=0.9,
+                  source=source,
+                  fill_color=bk.transform.factor_cmap('x',
+                                                      palette=cc.glasbey_dark,
+                                                      factors=stackers,
+                                                      start=1, end=2),
                   line_color="white")
-        
-        plot.xaxis.major_label_orientation = math.pi/4
+
+        plot.xaxis.major_label_orientation = math.pi / 4
         plot.y_range.start = 0
         plot.x_range.range_padding = 0.1
         show(plot)
 
     def stacked_meanplot(self):
         """Generate interactive stacked barplots with meaned replicates"""
-        
-        output_file(filename = self.metabolite +".html", title = self.metabolite)
 
-        #Nous filtrons les datas à plotter et préparons les moyennes et SD
+        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+
+        # Nous filtrons les datas à plotter et préparons les moyennes et SD
         tmpdf = self.filtered_data
         df_replicate_mean = tmpdf.groupby(
             ["condition_order", "condition", "time", "isotopologue"])[self.value].mean()
@@ -614,18 +609,18 @@ class InteractivePlot(Plot):
         mean_df = df_replicate_mean.to_frame()
         std_df = df_replicate_std.to_frame()
 
-        #Ici nous mettons les moyennes et SD dans des df
+        # Ici nous mettons les moyennes et SD dans des df
         mean_df_unstack = mean_df.unstack()
         mean_df_unstack.sort_index(level="condition_order", inplace=True)
-        mean_df_unstack = mean_df_unstack.droplevel(level = 0)
-        mean_df_unstack.columns = mean_df_unstack.columns.droplevel(level = 0)
+        mean_df_unstack = mean_df_unstack.droplevel(level=0)
+        mean_df_unstack.columns = mean_df_unstack.columns.droplevel(level=0)
         mean_df_unstack.columns = mean_df_unstack.columns.astype(str)
         mean_df_unstack.index = ['{}_{}'.format(i, j) for i, j in mean_df_unstack.index]
 
         std_df_unstack = std_df.unstack()
         std_df_unstack.sort_index(level="condition_order", inplace=True)
-        std_df_unstack = std_df_unstack.droplevel(level = 0)
-        std_df_unstack.columns = std_df_unstack.columns.droplevel(level = 0)
+        std_df_unstack = std_df_unstack.droplevel(level=0)
+        std_df_unstack.columns = std_df_unstack.columns.droplevel(level=0)
         std_df_unstack.columns = std_df_unstack.columns.astype(str)
         std_df_unstack.index = ['{}_{}'.format(i, j) for i, j in std_df_unstack.index]
 
@@ -641,45 +636,44 @@ class InteractivePlot(Plot):
         mean_listoflists = [mean_df_unstack[val].tolist() for val in stackers]
 
         meanplotdic = dict(zip(stackers, mean_listoflists))
-        meanplotdic.update({'ID' : my_x_range})
-        
-        #Nous récupérons les noms pour les tooltips
-        conditions, times = Plot.split_ids(my_x_range)
-        
-        meanplotdic.update({'conds' : conditions,
-                            'times' : times})
+        meanplotdic.update({'ID': my_x_range})
 
-        #Préparation des tooltips
+        # Nous récupérons les noms pour les tooltips
+        conditions, times = Plot.split_ids(my_x_range)
+
+        meanplotdic.update({'conds': conditions,
+                            'times': times})
+
+        # Préparation des tooltips
         TOOLTIPS = [
             ("Condition", "@conds"),
             ("Time", "@times"),
             ("Isotopologue", "$name"),
             ("Value", "@$name"),
-            ]
+        ]
 
-        #Initialization de la figure
+        # Initialization de la figure
         myplot = figure(
-            x_range = my_x_range,
+            x_range=my_x_range,
             plot_width=self.WIDTH,
             plot_height=self.HEIGHT,
             title=self.name,
             y_axis_label=self.value,
-            tools=self.plot_tools, 
+            tools=self.plot_tools,
             tooltips=TOOLTIPS
         )
 
         colors = cc.glasbey_dark[:len(stackers)]
 
-        #Passons au plot
-        myplot.vbar_stack(stackers, 
-        x='ID', 
-        source=meanplotdic,
-        width=0.9,
-        color=colors
-        )   
+        # Passons au plot
+        myplot.vbar_stack(stackers,
+                          x='ID',
+                          source=meanplotdic,
+                          width=0.9,
+                          color=colors
+                          )
 
-
-        #Nous préparons les données pour positionner les barres d'erreur
+        # Nous préparons les données pour positionner les barres d'erreur
         dico_upper_list = []
         dico_lower_list = []
 
@@ -690,12 +684,12 @@ class InteractivePlot(Plot):
         dico_upper_array = np.array(dico_upper_list)
         dico_lower_array = np.array(dico_lower_list)
 
-        #Nous faisons la suite couche par couche
+        # Nous faisons la suite couche par couche
         for val in stackers:
-            
             base = my_x_range
 
-            #Nous devons incrementer à chaque loop la valeur pour la barre d'erreur du dessous pour qvoir la bonne hauteur de placement
+            # Nous devons incrementer à chaque loop la valeur pour la barre d'erreur du dessous pour avoir la bonne
+            # hauteur de placement
             upper_listoflists = list(upper_df[val])
             lower_listoflists = list(lower_df[val])
             upper_array = np.array(upper_listoflists)
@@ -704,22 +698,22 @@ class InteractivePlot(Plot):
             dico_lower_array = np.add(dico_lower_array, lower_array)
             dico_lower_list = dico_lower_array.tolist()
             dico_upper_list = dico_upper_array.tolist()
-            whisker_dico = dict(base = base, upper = dico_upper_list, lower = dico_lower_list)
+            whisker_dico = dict(base=base, upper=dico_upper_list, lower=dico_lower_list)
             source = bk.models.ColumnDataSource(data=whisker_dico)
-            mywhisker = Whisker(source = source, base = "base", upper = "upper", lower = "lower", level="overlay")
+            mywhisker = Whisker(source=source, base="base", upper="upper", lower="lower", level="overlay")
 
-            #Nous ajoutons les barres d'erreurs (couche par couche)
-            myplot.add_layout(mywhisker)    
+            # Nous ajoutons les barres d'erreurs (couche par couche)
+            myplot.add_layout(mywhisker)
 
-        myplot.xaxis.major_label_orientation = math.pi/4
+        myplot.xaxis.major_label_orientation = math.pi / 4
         show(myplot)
 
     def unstacked_meanplot(self):
         """Generate interactive unstacked barplots with meaned replicates"""
-        
-        output_file(filename = self.metabolite +".html", title = self.metabolite)
 
-        #Préparation des datas à plotter
+        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+
+        # Préparation des datas à plotter
         tmpdf = self.filtered_data
         df_replicate_mean = tmpdf.groupby(
             ["condition_order", "condition", "time", "isotopologue"])[self.value].mean()
@@ -730,15 +724,15 @@ class InteractivePlot(Plot):
 
         mean_df_unstack = mean_df.unstack()
         mean_df_unstack.sort_index(level="condition_order", inplace=True)
-        mean_df_unstack = mean_df_unstack.droplevel(level = 0)
-        mean_df_unstack.columns = mean_df_unstack.columns.droplevel(level = 0)
+        mean_df_unstack = mean_df_unstack.droplevel(level=0)
+        mean_df_unstack.columns = mean_df_unstack.columns.droplevel(level=0)
         mean_df_unstack.columns = mean_df_unstack.columns.astype(str)
         mean_df_unstack.index = ['{}_{}'.format(i, j) for i, j in mean_df_unstack.index]
 
         std_df_unstack = std_df.unstack()
         std_df_unstack.sort_index(level="condition_order", inplace=True)
-        std_df_unstack = std_df_unstack.droplevel(level = 0)
-        std_df_unstack.columns = std_df_unstack.columns.droplevel(level = 0)
+        std_df_unstack = std_df_unstack.droplevel(level=0)
+        std_df_unstack.columns = std_df_unstack.columns.droplevel(level=0)
         std_df_unstack.columns = std_df_unstack.columns.astype(str)
         std_df_unstack.index = ['{}_{}'.format(i, j) for i, j in std_df_unstack.index]
         stackers = mean_df_unstack.columns.tolist()
@@ -746,73 +740,73 @@ class InteractivePlot(Plot):
         upper_df = mean_df_unstack.add(std_df_unstack, fill_value=0)
         lower_df = mean_df_unstack.sub(std_df_unstack, axis='index', fill_value=0)
 
-        #Même principe que pour les non stackés non moyennés sauf que nous préparons les barres d'erreur aussi
-        factors= [(i, stack) for i in mean_df_unstack.index for stack in stackers]
+        # Même principe que pour les non stackés non moyennés sauf que nous préparons les barres d'erreur aussi
+        factors = [(i, stack) for i in mean_df_unstack.index for stack in stackers]
         condition_time = [i[0] for i in factors]
         isotops = [i[1] for i in factors]
         conditions, times = Plot.split_ids(condition_time)
-        
-        tops=[row[int(stack) + 1] 
-              for row in mean_df_unstack.itertuples() 
-              for stack in stackers]
-        
-        upper_list=[row[int(stack) + 1]
-                    for row in upper_df.itertuples()
-                    for stack in stackers]
-        
-        lower_list=[row[int(stack) + 1]
-                    for row in lower_df.itertuples()
-                    for stack in stackers]
+
+        tops = [row[int(stack) + 1]
+                for row in mean_df_unstack.itertuples()
+                for stack in stackers]
+
+        upper_list = [row[int(stack) + 1]
+                      for row in upper_df.itertuples()
+                      for stack in stackers]
+
+        lower_list = [row[int(stack) + 1]
+                      for row in lower_df.itertuples()
+                      for stack in stackers]
 
         base = factors
         source = bk.models.ColumnDataSource(data=dict(
-            x=factors, tops=tops, conds = conditions,
-            times = times, isotops=isotops))
-        
-        #Nous faisons un ColumnDataSource pour les incertitudes
-        source_error = bk.models.ColumnDataSource(
-            data=dict(base = base, upper = upper_list, lower = lower_list))
+            x=factors, tops=tops, conds=conditions,
+            times=times, isotops=isotops))
 
-        #Préparation des tooltips
+        # Nous faisons un ColumnDataSource pour les incertitudes
+        source_error = bk.models.ColumnDataSource(
+            data=dict(base=base, upper=upper_list, lower=lower_list))
+
+        # Préparation des tooltips
         TOOLTIPS = [
             ("Condition", "@conds"),
             ("Time", "@times"),
             ("Isotopologue", "@isotops"),
             ("Fraction", "@tops")
-            ]
+        ]
 
-        #Initialisation de la figure
+        # Initialisation de la figure
         plot = figure(
-        x_range = bk.models.FactorRange(*factors), 
-        plot_width = self.WIDTH, 
-        plot_height = self.HEIGHT, 
-        tools = self.plot_tools, 
-        tooltips = TOOLTIPS)
+            x_range=bk.models.FactorRange(*factors),
+            plot_width=self.WIDTH,
+            plot_height=self.HEIGHT,
+            tools=self.plot_tools,
+            tooltips=TOOLTIPS)
 
-        #Passons au plot
-        plot.vbar(x='x', 
-                  top='tops', 
-                  width=0.9, 
-                  source=source, 
-                  fill_color = bk.transform.factor_cmap(
-                      'x', palette=cc.glasbey_dark, 
+        # Passons au plot
+        plot.vbar(x='x',
+                  top='tops',
+                  width=0.9,
+                  source=source,
+                  fill_color=bk.transform.factor_cmap(
+                      'x', palette=cc.glasbey_dark,
                       factors=stackers, start=1, end=2),
                   line_color="white")
 
         plot.add_layout(bk.models.Whisker(
-            source = source_error, 
-            base = "base", upper = "upper", 
-            lower = "lower", level="overlay"))
+            source=source_error,
+            base="base", upper="upper",
+            lower="lower", level="overlay"))
         plot.y_range.start = 0
         plot.x_range.range_padding = 0.1
         show(plot)
 
     def stacked_areaplot(self):
         """Generate interactive stacked areaplots"""
-        
-        output_file(filename = self.metabolite + ".html", title = self.metabolite)
-        
-        #Commençons par la préparation de data
+
+        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+
+        # Commençons par la préparation de data
         stackdf = self.filtered_data
         stackpivot = stackdf.pivot(index='ID', columns='isotopologue', values=self.value)
         stackpivot.columns = stackpivot.columns.astype(str)
@@ -824,22 +818,22 @@ class InteractivePlot(Plot):
             ("", "<strong>@ID</strong>"),
             ("isotopologue", "$name"),
             ("ID", "@$name"),
-            ]
+        ]
 
         plot = figure(
-        width = self.WIDTH,
-        height = self.HEIGHT,
-        tools=self.plot_tools,
-        tooltips=TOOLTIPS,
-        x_range = stackpivot.index.values
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            tools=self.plot_tools,
+            tooltips=TOOLTIPS,
+            x_range=stackpivot.index.values
         )
 
-        plot.xaxis.major_label_orientation = math.pi/4
-        plot.varea_stack(mystackers, x = "ID", color=colors, source=mysource)
+        plot.xaxis.major_label_orientation = math.pi / 4
+        plot.varea_stack(mystackers, x="ID", color=colors, source=mysource)
         show(plot)
-    
-class Map:
 
+
+class Map:
     """
     Class to create maps from Isocor output (MS data from C13 labelling experiments)
 
@@ -856,146 +850,110 @@ class Map:
         self.annot = annot
         self.fmt = fmt
         self.display = display
-        
-        #Il faut préparer les données pour les maps:
+
+        # Il faut préparer les données pour les maps:
         self.heatmapdf = self.data[
-            ['metabolite', 'mean_enrichment', 
+            ['metabolite', 'mean_enrichment',
              'condition', 'time', 'number_rep']]
         self.heatmapdf = self.heatmapdf[self.heatmapdf['mean_enrichment'] != 0]
         self.heatmapdf.drop_duplicates(inplace=True)
         self.heatmapdf.dropna(inplace=True)
         self.heatmapdf.set_index('metabolite', inplace=True)
-        self.heatmapdf['Condition_Time'] = self.heatmapdf['condition'].apply(str) + '_T' + self.heatmapdf['time'].apply(str)
+        self.heatmapdf['Condition_Time'] = self.heatmapdf['condition'].apply(str) + '_T' + self.heatmapdf['time'].apply(
+            str)
         self.heatmapdf = self.heatmapdf.groupby(
-            ['metabolite','Condition_Time'])['mean_enrichment'].mean()
+            ['metabolite', 'Condition_Time'])['mean_enrichment'].mean()
         self.heatmapdf = self.heatmapdf.unstack(0)
         self.dc_heatmap = self.heatmapdf.describe(include='all')
-        self.heatmap_center = self.dc_heatmap.iloc[5,0].mean()
+        self.heatmap_center = self.dc_heatmap.iloc[5, 0].mean()
         self.clustermapdf = self.heatmapdf.fillna(value=0)
-        
+
     def build_heatmap(self):
         """
         Create a heatmap of mean_enrichment data across
         all conditions & times & metabolites
         """
-        
-        fig, ax = plt.subplots(figsize = (30,30)) 
+
+        fig, ax = plt.subplots(figsize=(30, 30))
         sns.set(font_scale=1)
-        sns.heatmap(self.heatmapdf,vmin=0.02, 
-                    robust=True, center=self.heatmap_center, 
-                    annot=self.annot, fmt="f", linecolor='black', 
-                    linewidths=.2, cmap = 'Blues', ax=ax)
-        plt.yticks(rotation = 0, fontsize=20)
-        plt.xticks(rotation = 45, fontsize=20)
+        sns.heatmap(self.heatmapdf, vmin=0.02,
+                    robust=True, center=self.heatmap_center,
+                    annot=self.annot, fmt="f", linecolor='black',
+                    linewidths=.2, cmap='Blues', ax=ax)
+        plt.yticks(rotation=0, fontsize=20)
+        plt.xticks(rotation=45, fontsize=20)
         # bottom, top = ax.get_ylim()
         plt.savefig(self.name + '.' + self.fmt, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
-        else:
-            plt.close()
-         
+
     def build_clustermap(self):
         """
         Create a clustermap of mean_enrichment data across
         all conditions & times & metabolites
         """
-        
+
         sns.set(font_scale=1)
-        cg = sns.clustermap(self.clustermapdf, 
-                            cmap="Blues", fmt="f", 
-                            linewidths=.2, standard_scale=1, 
-                            figsize = (30,30), linecolor='black', 
+        cg = sns.clustermap(self.clustermapdf,
+                            cmap="Blues", fmt="f",
+                            linewidths=.2, standard_scale=1,
+                            figsize=(30, 30), linecolor='black',
                             annot=self.annot)
         plt.setp(cg.ax_heatmap.yaxis.get_majorticklabels(), rotation=0, fontsize=20)
         plt.setp(cg.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, fontsize=20)
         plt.savefig(self.name + '.' + self.fmt, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
-        else:
-            plt.close()
-            
+
     def build_interactive_heatmap(self):
         """
         Create an interactive heatmap of mean_enrichment data across
         all conditions & times & metabolites
         """
-        
-        output_file(filename = self.name + ".html", title = self.name + ".html")
-        
+
+        output_file(filename=self.name + ".html", title=self.name + ".html")
+
         condition_time = list(self.heatmapdf.index.astype(str))
         metabolites = list(self.heatmapdf.columns)
-        
-        #Nous réordonnons les données
+
+        # Nous réordonnons les données
         df = pd.DataFrame(self.heatmapdf.stack(), columns=["values"]).reset_index()
-        
-        #Nous préparons les couleurs
+
+        # Nous préparons les couleurs
         colors = cc.kbc[len(df)]
-        mapper = LinearColorMapper(palette= cc.kbc[:len(df)])
-        
+        mapper = LinearColorMapper(palette=cc.kbc[:len(df)])
+
         TOOLTIPS = "hover,save"
-        
-        #initialisation de la figure
+
+        # initialisation de la figure
         p = figure(title=self.name,
-               x_range=list(reversed(metabolites)), y_range=condition_time,
-               x_axis_location="below", plot_width=1080, plot_height=640,
-               tools=TOOLTIPS, toolbar_location='above',
-               tooltips=[('datapoint', '@metabolite @Condition_Time'), ('value', "@values")])
-        
+                   x_range=list(reversed(metabolites)), y_range=condition_time,
+                   x_axis_location="below", plot_width=1080, plot_height=640,
+                   tools=TOOLTIPS, toolbar_location='above',
+                   tooltips=[('datapoint', '@metabolite @Condition_Time'), ('value', "@values")])
+
         p.grid.grid_line_color = None
         p.axis.axis_line_color = None
         p.axis.major_tick_line_color = None
         p.axis.major_label_text_font_size = "15px"
         p.axis.major_label_standoff = 0
         p.xaxis.major_label_orientation = math.pi / 3
-        
-        #Passons au plot
-        p.rect(x="metabolite", 
-               y="Condition_Time", 
+
+        # Passons au plot
+        p.rect(x="metabolite",
+               y="Condition_Time",
                width=1, height=1,
                source=df,
                fill_color={'field': "values", 'transform': mapper},
                line_color=None)
-        
-        #Nous préparons la barre de couleur pour la légende
+
+        # Nous préparons la barre de couleur pour la légende
         color_bar = ColorBar(color_mapper=mapper, major_label_text_font_size="7px",
-                         ticker=BasicTicker(desired_num_ticks=len(colors)),
-                         formatter=PrintfTickFormatter(),
-                         label_standoff=6, border_line_color=None, location=(0, 0))
-        
-        #Ajoutons la barre de couleur de la légende
+                             ticker=BasicTicker(desired_num_ticks=len(colors)),
+                             formatter=PrintfTickFormatter(),
+                             label_standoff=6, border_line_color=None, location=(0, 0))
+
+        # Ajoutons la barre de couleur de la légende
         p.add_layout(color_bar, 'right')
-        
+
         show(p)
-    
-   
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-            

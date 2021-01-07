@@ -114,7 +114,7 @@ def meanplot(stack, value, data, name, metabolites, conditions, times, fmt):
    
     for metabolite in metabolites:
         
-        plotter = StaticPlot(stack, value, data, name, fmt, metabolite, conditions, times, fmt)
+        plotter = StaticPlot(stack, value, data, name, metabolite, conditions, times, fmt)
         plotter.display = True
         
         if value != 'mean_enrichment':
@@ -202,5 +202,5 @@ def build_map(data, name, map_select, annot, fmt):
         mapper.fmt = 'html'
         mapper.build_interactive_heatmap()
         
-    if map_select == "Static clustermap":
+    if map_select == "Clustermap":
         mapper.build_clustermap()
