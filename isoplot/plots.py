@@ -22,29 +22,29 @@ else:
         
         
 class Plot:
+    """
+    Plot objects Master Class from which the rest inherit
+
+    :param stack: Value to denote if barplots should stack
+    :type stack: Bool
+    :param value: Data to be plotted. Can be 'isotopologue_fraction', 'corrected area' or 'mean_enrichment'
+    :type value: str
+    :param data: IsoplotData object containing clean data
+    :type data: Pandas Dataframe
+    :param name: Name for generated file directory where plots will go
+    :type name: str
+    :param metabolite: metabolite to be plotted
+    :type metabolite: str
+    :param condition: List of conditions to be plotted
+    :type condition: list
+    :param time: List of times to be plotted
+    :type time: list
+    """
 
     WIDTH = 1080
     HEIGHT = 640
     
     def __init__(self, stack, value, data, name, metabolite, condition, time):
-        """
-        Plot objects Master Class from which the rest inherit
-
-        :param stack: Value to denote if barplots should stack
-        :type stack: Bool
-        :param value: Data to be plotted. Can be 'isotopologue_fraction', 'corrected area' or 'mean_enrichment'
-        :type value: str
-        :param data: IsoplotData object containing clean data
-        :type data: Pandas Dataframe
-        :param name: Name for generated file directory where plots will go
-        :type name: str
-        :param metabolite: metabolite to be plotted
-        :type metabolite: str
-        :param condition: List of conditions to be plotted
-        :type condition: list
-        :param time: List of times to be plotted
-        :type time: list
-        """
 
         self.stack = stack
         self.value = value
@@ -101,15 +101,19 @@ class Plot:
 
 
 class StaticPlot(Plot):
-    """Class to generate the different static plots."""
+    """
+    Class to generate the different static plots.
+
+    :param fmt: Output format of static plots (pdf, svg, png or jpeg)
+    :type fmt: str
+    :param display: Should plots be displayed when created
+    :type display: Bool
+    """
 
     def __init__(self, stack, value, data, name, metabolite, 
                  condition, time, fmt, display=False):
         """
-        :param fmt: Output format of static plots (pdf, svg, png or jpeg)
-        :type fmt: str
-        :param display: Should plots be displayed when created
-        :type display: Bool
+
         """
         
         super().__init__(stack, value, data, name, metabolite, condition, time)
@@ -836,12 +840,16 @@ class InteractivePlot(Plot):
     
 class Map:
 
-    """Class to create maps from Isocor output (MS data from C13 labelling experiments)"""
+    """
+    Class to create maps from Isocor output (MS data from C13 labelling experiments)
+
+    :param annot: Should annotations be apparent on map or not
+    :type annot: Bool
+    """
 
     def __init__(self, data, name, annot, fmt, display=False):
         """
-        :param annot: Should annotations be apparent on map or not
-        :type annot: Bool
+
         """
         self.data = data
         self.name = name
