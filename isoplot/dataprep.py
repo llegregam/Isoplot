@@ -55,14 +55,16 @@ class IsoplotData:
         try:
             self.isoplot_logger.debug('Trying to open csv with ";" separator')
             self.data = pd.read_csv(self.datapath, sep=';')
-        except Exception as _:
+            self.data.columns[1]
+        except IndexError as _:
             try:
-                self.isoplot_logger.debug('Trying to open csv with "\t" separator')
+                self.isoplot_logger.debug('Trying to open csv with tabulated separator')
                 self.data = pd.read_csv(self.datapath, sep='\t')
-            except Exception as err:
+                self.data.columns[1]
+            except IndexError as err:
                 self.isoplot_logger.error(
-                    'There was a problem reading the csv file. Check that format is .csv with ";" or tabulated '
-                    'separator')
+                    'There was a problem reading the file. Check that format is .csv with ";" or tabulated'
+                    "separator")
                 self.isoplot_logger.error(err)
         else:
             if type(self.data) is None:
@@ -148,5 +150,6 @@ class IsoplotData:
         self.dfmerge['time'].apply(int)
         self.dfmerge['number_rep'].apply(int)
         self.dfmerge.sort_values(['condition_order', 'condition'], inplace=True)
+        self.dfmerge.fillna(0, inplace=True)
         self.dfmerge.to_excel(r'Data Export.xlsx', index=False)
         self.isoplot_logger.info('Data exported. Check Data Export.xlsx')
