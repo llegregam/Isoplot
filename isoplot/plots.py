@@ -6,7 +6,7 @@ try:
     import seaborn as sns
     import pandas as pd
     from natsort import natsorted
-    from bokeh.plotting import figure, output_file, show
+    from bokeh.plotting import figure, output_file, show, save
     from bokeh.models import Whisker, BasicTicker, ColorBar, LinearColorMapper, PrintfTickFormatter
     import colorcet as cc
     import bokeh as bk
@@ -44,7 +44,7 @@ class Plot:
     WIDTH = 1080
     HEIGHT = 640
 
-    def __init__(self, stack, value, data, name, metabolite, condition, time):
+    def __init__(self, stack, value, data, name, metabolite, condition, time, display):
 
         self.stack = stack
         self.value = value
@@ -53,6 +53,7 @@ class Plot:
         self.metabolite = metabolite
         self.condition = condition
         self.time = time
+        self.display = display
         self.filtered_data = self.data[
             (self.data['metabolite'] == self.metabolite) &
             (self.data['condition'].isin(self.condition)) &
@@ -110,15 +111,14 @@ class StaticPlot(Plot):
     """
 
     def __init__(self, stack, value, data, name, metabolite,
-                 condition, time, fmt, display=False):
+                 condition, time, fmt, display):
         """
 
         """
 
-        super().__init__(stack, value, data, name, metabolite, condition, time)
+        super().__init__(stack, value, data, name, metabolite, condition, time, display)
         self.fmt = fmt
         self.static_fig_name = self.metabolite + '.' + self.fmt
-        self.display = display
 
     def stacked_areaplot(self):
         """Creation of area stackplot (for cinetic data)"""
@@ -307,9 +307,9 @@ class StaticPlot(Plot):
 class InteractivePlot(Plot):
     """Class to generate the different interactive plots"""
 
-    def __init__(self, stack, value, data, name, metabolite, condition, time):
+    def __init__(self, stack, value, data, name, metabolite, condition, time, display):
 
-        super().__init__(stack, value, data, name, metabolite, condition, time)
+        super().__init__(stack, value, data, name, metabolite, condition, time, display)
         self.filename = self.metabolite + ".html"
         self.plot_tools = "save, wheel_zoom, reset, hover, pan"
 
@@ -370,7 +370,10 @@ class InteractivePlot(Plot):
                     source=source)
 
         myplot.xaxis.major_label_orientation = math.pi / 4
-        show(myplot)
+        if self.display:
+            show(myplot)
+        else:
+            save(myplot)
 
     def mean_enrichment_meanplot(self):
         """Generate interactive mean_enrichment plots with meaned replicates"""
@@ -461,7 +464,10 @@ class InteractivePlot(Plot):
         myplot.add_layout(mywhisker)
 
         myplot.xaxis.major_label_orientation = math.pi / 4
-        show(myplot)
+        if self.display:
+            show(myplot)
+        else:
+            save(myplot)
 
     def stacked_barplot(self):
         """Generate interactive stacked barplots"""
@@ -526,7 +532,10 @@ class InteractivePlot(Plot):
 
         myplot.xaxis.major_label_orientation = math.pi / 4
 
-        show(myplot)
+        if self.display:
+            show(myplot)
+        else:
+            save(myplot)
 
     def unstacked_barplot(self):
         """Generate interactive unstacked barplots"""
@@ -593,7 +602,10 @@ class InteractivePlot(Plot):
         plot.xaxis.major_label_orientation = math.pi / 4
         plot.y_range.start = 0
         plot.x_range.range_padding = 0.1
-        show(plot)
+        if self.display:
+            show(myplot)
+        else:
+            save(myplot)
 
     def stacked_meanplot(self):
         """Generate interactive stacked barplots with meaned replicates"""
@@ -706,7 +718,10 @@ class InteractivePlot(Plot):
             myplot.add_layout(mywhisker)
 
         myplot.xaxis.major_label_orientation = math.pi / 4
-        show(myplot)
+        if self.display:
+            show(myplot)
+        else:
+            save(myplot)
 
     def unstacked_meanplot(self):
         """Generate interactive unstacked barplots with meaned replicates"""
@@ -799,7 +814,10 @@ class InteractivePlot(Plot):
             lower="lower", level="overlay"))
         plot.y_range.start = 0
         plot.x_range.range_padding = 0.1
-        show(plot)
+        if self.display:
+            show(myplot)
+        else:
+            save(myplot)
 
     def stacked_areaplot(self):
         """Generate interactive stacked areaplots"""
@@ -830,7 +848,10 @@ class InteractivePlot(Plot):
 
         plot.xaxis.major_label_orientation = math.pi / 4
         plot.varea_stack(mystackers, x="ID", color=colors, source=mysource)
-        show(plot)
+        if self.display:
+            show(myplot)
+        else:
+            save(myplot)
 
 
 class Map:
@@ -956,4 +977,7 @@ class Map:
         # Ajoutons la barre de couleur de la légende
         p.add_layout(color_bar, 'right')
 
-        show(p)
+        if self.display:
+            show(myplot)
+        else:
+            save(myplot)

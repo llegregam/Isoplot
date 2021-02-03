@@ -79,7 +79,7 @@ metadatabtn.on_click(metadatabtn_eventhandler)
 datamerge_btn.on_click(dataprep_eventhandler)
 
 #Fonction permettant le filtrage des données à plotter et appelant les fonctions de plotting
-def indiplot (stack, value, data, name, metabolites, conditions, times, fmt, stackplot=False):
+def indiplot (stack, value, data, name, metabolites, conditions, times, fmt, display, stackplot=False):
     
     #Préparons le directory où seront enregistrés les html avec les plots
     now = datetime.datetime.now()
@@ -90,8 +90,8 @@ def indiplot (stack, value, data, name, metabolites, conditions, times, fmt, sta
     
     for metabolite in metabolites:
         
-        plotter = StaticPlot(stack, value, data, name, metabolite, conditions, times, fmt)
-        plotter.display = True
+        plotter = StaticPlot(stack, value, data, name, metabolite, conditions, times, fmt,
+                             display=display)
         
         if value != 'mean_enrichment':
             if stackplot == True:
@@ -104,7 +104,7 @@ def indiplot (stack, value, data, name, metabolites, conditions, times, fmt, sta
     os.chdir(mydir) #Revenir au dir initial
     
 #Fonction permettant le filtrage des données à plotter et appelant les fonctions de plotting
-def meanplot(stack, value, data, name, metabolites, conditions, times, fmt):
+def meanplot(stack, value, data, name, metabolites, conditions, times, fmt, display):
     
     now = datetime.datetime.now()
     date_time = now.strftime("%d%m%Y_%H%M%S") #Récupération date et heure
@@ -114,8 +114,8 @@ def meanplot(stack, value, data, name, metabolites, conditions, times, fmt):
    
     for metabolite in metabolites:
         
-        plotter = StaticPlot(stack, value, data, name, metabolite, conditions, times, fmt)
-        plotter.display = True
+        plotter = StaticPlot(stack, value, data, name, metabolite, conditions, times, fmt,
+                             display=display)
         
         if value != 'mean_enrichment':
             plotter.mean_barplot()
@@ -125,7 +125,7 @@ def meanplot(stack, value, data, name, metabolites, conditions, times, fmt):
     os.chdir(mydir) #Revenir au dir initial  
     
 #Création d'une fonction pour gérer les appels aux fonctions de plotting en individuel
-def indibokplot(stack, value, data, name, metabolites, conditions, times, stackplot=False):
+def indibokplot(stack, value, data, name, metabolites, conditions, times, display, stackplot=False):
     
     #Préparons le directory où seront enregistrés les html avec les plots
     now = datetime.datetime.now()
@@ -139,8 +139,8 @@ def indibokplot(stack, value, data, name, metabolites, conditions, times, stackp
         if name == '':
             name = metabolite
         
-        plotter = InteractivePlot(stack, value, data, name, metabolite, conditions, times)
-        plotter.display = True
+        plotter = InteractivePlot(stack, value, data, name, metabolite, conditions, times,
+                                  display=display)
         
         if value != 'mean_enrichment': #Le cas du mean enrichment est différent car les valeurs sont en double à la sortie d'Isocor   
             
@@ -159,7 +159,7 @@ def indibokplot(stack, value, data, name, metabolites, conditions, times, stackp
     os.chdir(mydir) #Revenir au dir initial
     
 #Création d'une fonction pour gérer les appels aux fonctions de plotting en individuel
-def meanbokplot(stack, value, data, name, metabolites, conditions, times):
+def meanbokplot(stack, value, data, name, metabolites, conditions, times, display):
     
     #Préparons le directory où seront enregistrés les html avec les plots
     now = datetime.datetime.now()
@@ -173,8 +173,8 @@ def meanbokplot(stack, value, data, name, metabolites, conditions, times):
         if name == '':
             name = metabolite
         
-        plotter = InteractivePlot(stack, value, data, name, metabolite, conditions, times)
-        plotter.display = True
+        plotter = InteractivePlot(stack, value, data, name, metabolite, conditions, times,
+                                  display=display)
         
         if value != 'mean_enrichment': #Le cas du mean enrichment est différent car les valeurs sont en double à la sortie d'Isocor   
             
@@ -190,10 +190,9 @@ def meanbokplot(stack, value, data, name, metabolites, conditions, times):
     os.chdir(mydir) #Revenir au dir initial
     
 #Fontion pour choisir le map à générer:
-def build_map(data, name, map_select, annot, fmt):
+def build_map(data, name, map_select, annot, fmt, display):
     
-    mapper = Map(data, name, annot, fmt)
-    mapper.display == True
+    mapper = Map(data, name, annot, fmt, display=display)
     
     if map_select == "Static heatmap":
         mapper.build_heatmap()
