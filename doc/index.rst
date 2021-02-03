@@ -28,6 +28,8 @@ The code is open-source, and available on GitHub under a GPLv3 license .
 * **Open-source, free and easy to install** everywhere where Python 3 is available
 * **Biologist-friendly**
 
+The documentation relative to Isoplot's installation and usage can be found on `ReadTheDocs <https://isoplot2.readthedocs.io/>`_.
+
 
 .. toctree::
    :maxdepth: 2
@@ -43,3 +45,4 @@ The code is open-source, and available on GitHub under a GPLv3 license .
    
    definitions.rst
    reference.rst
+   faq.rst

@@ -39,7 +39,16 @@ setup(
         "colorcet>=2.0.2",
         "openpyxl>=3.0.5",
         "xlrd>=1.2.0"
-    ], 
+    ],
+    extras_require={  # Optional
+        'dev': ['Sphinx',
+                "sphinx-argparse",
+                "autodoc",
+                "sphinx_rtd_theme",
+                "sdist",
+                "twine"
+                ]
+    },
 	entry_points = {
         'console_scripts': [
             'isoplot = isoplot.isoplotcli:initialize_cli',

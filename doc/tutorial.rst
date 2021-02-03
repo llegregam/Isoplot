@@ -26,7 +26,8 @@ Once the data has been loaded into Isoplot through the notebook or the command-l
 by either clicking on the **« submit data »** button in the notebook or by not giving the command-line the template 
 option. The template is a xlsx document that can be opened with excel, and contains a number of columns :
 
-* **Sample** : this colummn corresponds to **the names given to the samples in the original dataset** and **must not be modified**,or else Isoplot will not be able to pair the template’s information with the data.
+* **Sample** : this colummn corresponds to **the names given to the samples in the original dataset** and **must not be modified**,
+or else Isoplot will not be able to pair the template’s information with the data.
 
 * **Condition** : The different conditions for each sample
 
@@ -35,6 +36,8 @@ option. The template is a xlsx document that can be opened with excel, and conta
 * **Time** : The different time points for each sample.
 
 * **Replicate number** : Different replicate numbers for each sample. **They must be numbered starting from 1 to n (n being number of replicates)** for each condition+time.
+
+.. note:: If for any reason one of the samples must not be plotted or taken into account by Isoplot, remove the associated line from the template file
 
 .. warning:: It is important to properly fill the template table as it is what Isoplot will use to define which data to group together for the plots.
 
