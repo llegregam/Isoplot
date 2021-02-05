@@ -1,5 +1,5 @@
-Isoplot 2
-===================================
+Isoplot
+=======
 
 **Isoplot is a software for the visualisation of MS data from C13 labelling experiments.**
 It takes as input corrected MS data from `IsoCor <https://isocor.readthedocs.io/en/latest/>`_ in csv or tsv format.

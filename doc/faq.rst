@@ -21,3 +21,10 @@ This happens when we generate multiple times the directory by using the same nam
 (in the case of an error for example on the first try, or a mistake when selecting data to be
 plotted). A quick fix is to restart the Kernel or change the name of the directory to be created
 before generating the plots.
+
+**4. I am trying to create barplots with meaned data (so with error bars) for isotopologue_fractions,
+but some of my bars seem abherrent. They have error bars that go until under 0 and the total of the
+fractions is not equal to 1. Why is this?
+
+This happens when data is missing for only some replicates of a given sample condition & time. An ulterior
+version of Isoplot will fix this, and not mean with replicates that are equal to 0.
