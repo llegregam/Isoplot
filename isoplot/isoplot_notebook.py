@@ -99,7 +99,7 @@ def indiplot (stack, value, data, name, metabolites, conditions, times, fmt, dis
             else:
                 plotter.barplot()
         elif value == 'mean_enrichment':
-            plotter.plot_static_mean_enrichment_plot()
+            plotter.mean_enrichment_plot()
 
     os.chdir(mydir) #Revenir au dir initial
     
@@ -120,7 +120,7 @@ def meanplot(stack, value, data, name, metabolites, conditions, times, fmt, disp
         if value != 'mean_enrichment':
             plotter.mean_barplot()
         elif value == 'mean_enrichment':
-            plotter.static_mean_enrichment_meanplot()
+            plotter.mean_enrichment_meanplot()
 
     os.chdir(mydir) #Revenir au dir initial  
     

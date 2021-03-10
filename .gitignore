@@ -1,2 +1,5 @@
 /doc/_build/
 
+/isoplot/object_notebook.py
+/isoplot.egg-info/
+/venvs/

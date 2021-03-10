@@ -10,7 +10,7 @@ It is one of the routine tools used on the `MetaToul platform <https://www6.toul
 
 The code is open-source, and available on GitHub under a GPLv3 license.
 
-The documentation relative to Isoplot's installation and usage can be found on `ReadTheDocs <https://isoplot2.readthedocs.io/>`_.
+The documentation relative to Isoplot's installation and usage can be found on `ReadTheDocs <https://isoplot.readthedocs.io/>`_.
 
 .. rubric:: Key Features
 

@@ -27,4 +27,4 @@ but some of my bars seem abherrent. They have error bars that go until under 0 a
 fractions is not equal to 1. Why is this?
 
 This happens when data is missing for only some replicates of a given sample condition & time. An ulterior
-version of Isoplot will fix this, and not mean with replicates that are equal to 0.
+version of Isoplot will fix this by not using data points equal to 0 when calculating the mean.

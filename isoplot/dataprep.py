@@ -141,12 +141,15 @@ class IsoplotData:
 
         self.isoplot_logger.debug("Creating IDs...")
 
-        # Nous créons ici une colonne pour identifier chaque ligne avec condition+temps+numero de répétition (possibilité de rajouter un tag metabolite plus tard si besoin)
+        # Nous créons ici une colonne pour identifier chaque ligne avec condition+temps+numero de répétition
+        # (possibilité de rajouter un tag metabolite plus tard si besoin)
         self.dfmerge['ID'] = self.dfmerge['condition'].apply(str) + '_T' + self.dfmerge['time'].apply(str) + '_' + \
                              self.dfmerge['number_rep'].apply(str)
 
         self.isoplot_logger.debug('Applying final transformations...')
-        # Vaut mieux ensuite retransformer les colonnes temps et number_rep en entiers pour éviter des problèmes éventuels de type
+
+        # Vaut mieux ensuite retransformer les colonnes temps et number_rep en entiers pour
+        # éviter des problèmes éventuels de type
         self.dfmerge['time'].apply(int)
         self.dfmerge['number_rep'].apply(int)
         self.dfmerge.sort_values(['condition_order', 'condition'], inplace=True)

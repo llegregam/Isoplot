@@ -112,9 +112,7 @@ class StaticPlot(Plot):
 
     def __init__(self, stack, value, data, name, metabolite,
                  condition, time, fmt, display):
-        """
 
-        """
 
         super().__init__(stack, value, data, name, metabolite, condition, time, display)
         self.fmt = fmt
@@ -422,10 +420,9 @@ class InteractivePlot(Plot):
         # Nous préparons les datas pour plotter
         my_x_range = mean_series.index.tolist()
         values = mean_series.to_list()
-        conditions, times, replicates = Plot.split_ids(my_x_range)
+        conditions, times = Plot.split_ids(my_x_range)
         my_dict = dict(ID=my_x_range, tops=values,
-                       conds=conditions, times=times,
-                       reps=replicates)
+                       conds=conditions, times=times)
         source = bk.models.ColumnDataSource(my_dict)
 
         # Nous préparons le dictionnaire qui va faire le ColumnDataSource pour les barres d'erreur
@@ -581,7 +578,7 @@ class InteractivePlot(Plot):
         ]
 
         # Initialisation de la figure
-        plot = figure(
+        myplot = figure(
             x_range=bk.models.FactorRange(*factors),  # Voir docu sur Bokeh.org pour ça
             plot_width=self.WIDTH,
             plot_height=self.HEIGHT,
@@ -589,7 +586,7 @@ class InteractivePlot(Plot):
             tooltips=TOOLTIPS)
 
         # Passons au plot
-        plot.vbar(x='x',
+        myplot.vbar(x='x',
                   top='tops',
                   width=0.9,
                   source=source,
@@ -599,9 +596,9 @@ class InteractivePlot(Plot):
                                                       start=1, end=2),
                   line_color="white")
 
-        plot.xaxis.major_label_orientation = math.pi / 4
-        plot.y_range.start = 0
-        plot.x_range.range_padding = 0.1
+        myplot.xaxis.major_label_orientation = math.pi / 4
+        myplot.y_range.start = 0
+        myplot.x_range.range_padding = 0.1
         if self.display:
             show(myplot)
         else:
@@ -791,7 +788,7 @@ class InteractivePlot(Plot):
         ]
 
         # Initialisation de la figure
-        plot = figure(
+        myplot = figure(
             x_range=bk.models.FactorRange(*factors),
             plot_width=self.WIDTH,
             plot_height=self.HEIGHT,
@@ -799,7 +796,7 @@ class InteractivePlot(Plot):
             tooltips=TOOLTIPS)
 
         # Passons au plot
-        plot.vbar(x='x',
+        myplot.vbar(x='x',
                   top='tops',
                   width=0.9,
                   source=source,
@@ -808,12 +805,12 @@ class InteractivePlot(Plot):
                       factors=stackers, start=1, end=2),
                   line_color="white")
 
-        plot.add_layout(bk.models.Whisker(
+        myplot.add_layout(bk.models.Whisker(
             source=source_error,
             base="base", upper="upper",
             lower="lower", level="overlay"))
-        plot.y_range.start = 0
-        plot.x_range.range_padding = 0.1
+        myplot.y_range.start = 0
+        myplot.x_range.range_padding = 0.1
         if self.display:
             show(myplot)
         else:
@@ -838,7 +835,7 @@ class InteractivePlot(Plot):
             ("ID", "@$name"),
         ]
 
-        plot = figure(
+        myplot = figure(
             width=self.WIDTH,
             height=self.HEIGHT,
             tools=self.plot_tools,
@@ -846,8 +843,8 @@ class InteractivePlot(Plot):
             x_range=stackpivot.index.values
         )
 
-        plot.xaxis.major_label_orientation = math.pi / 4
-        plot.varea_stack(mystackers, x="ID", color=colors, source=mysource)
+        myplot.xaxis.major_label_orientation = math.pi / 4
+        myplot.varea_stack(mystackers, x="ID", color=colors, source=mysource)
         if self.display:
             show(myplot)
         else:
@@ -863,9 +860,7 @@ class Map:
     """
 
     def __init__(self, data, name, annot, fmt, display=False):
-        """
 
-        """
         self.data = data
         self.name = name
         self.annot = annot
@@ -947,21 +942,21 @@ class Map:
         TOOLTIPS = "hover,save"
 
         # initialisation de la figure
-        p = figure(title=self.name,
+        myplot = figure(title=self.name,
                    x_range=list(reversed(metabolites)), y_range=condition_time,
                    x_axis_location="below", plot_width=1080, plot_height=640,
                    tools=TOOLTIPS, toolbar_location='above',
                    tooltips=[('datapoint', '@metabolite @Condition_Time'), ('value', "@values")])
 
-        p.grid.grid_line_color = None
-        p.axis.axis_line_color = None
-        p.axis.major_tick_line_color = None
-        p.axis.major_label_text_font_size = "15px"
-        p.axis.major_label_standoff = 0
-        p.xaxis.major_label_orientation = math.pi / 3
+        myplot.grid.grid_line_color = None
+        myplot.axis.axis_line_color = None
+        myplot.axis.major_tick_line_color = None
+        myplot.axis.major_label_text_font_size = "15px"
+        myplot.axis.major_label_standoff = 0
+        myplot.xaxis.major_label_orientation = math.pi / 3
 
         # Passons au plot
-        p.rect(x="metabolite",
+        myplot.rect(x="metabolite",
                y="Condition_Time",
                width=1, height=1,
                source=df,
@@ -975,7 +970,7 @@ class Map:
                              label_standoff=6, border_line_color=None, location=(0, 0))
 
         # Ajoutons la barre de couleur de la légende
-        p.add_layout(color_bar, 'right')
+        myplot.add_layout(color_bar, 'right')
 
         if self.display:
             show(myplot)
