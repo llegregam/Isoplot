@@ -113,7 +113,6 @@ class StaticPlot(Plot):
     def __init__(self, stack, value, data, name, metabolite,
                  condition, time, fmt, display):
 
-
         super().__init__(stack, value, data, name, metabolite, condition, time, display)
         self.fmt = fmt
         self.static_fig_name = self.metabolite + '.' + self.fmt
@@ -587,14 +586,14 @@ class InteractivePlot(Plot):
 
         # Passons au plot
         myplot.vbar(x='x',
-                  top='tops',
-                  width=0.9,
-                  source=source,
-                  fill_color=bk.transform.factor_cmap('x',
-                                                      palette=cc.glasbey_dark,
-                                                      factors=stackers,
-                                                      start=1, end=2),
-                  line_color="white")
+                    top='tops',
+                    width=0.9,
+                    source=source,
+                    fill_color=bk.transform.factor_cmap('x',
+                                                        palette=cc.glasbey_dark,
+                                                        factors=stackers,
+                                                        start=1, end=2),
+                    line_color="white")
 
         myplot.xaxis.major_label_orientation = math.pi / 4
         myplot.y_range.start = 0
@@ -797,13 +796,13 @@ class InteractivePlot(Plot):
 
         # Passons au plot
         myplot.vbar(x='x',
-                  top='tops',
-                  width=0.9,
-                  source=source,
-                  fill_color=bk.transform.factor_cmap(
-                      'x', palette=cc.glasbey_dark,
-                      factors=stackers, start=1, end=2),
-                  line_color="white")
+                    top='tops',
+                    width=0.9,
+                    source=source,
+                    fill_color=bk.transform.factor_cmap(
+                        'x', palette=cc.glasbey_dark,
+                        factors=stackers, start=1, end=2),
+                    line_color="white")
 
         myplot.add_layout(bk.models.Whisker(
             source=source_error,
@@ -943,10 +942,10 @@ class Map:
 
         # initialisation de la figure
         myplot = figure(title=self.name,
-                   x_range=list(reversed(metabolites)), y_range=condition_time,
-                   x_axis_location="below", plot_width=1080, plot_height=640,
-                   tools=TOOLTIPS, toolbar_location='above',
-                   tooltips=[('datapoint', '@metabolite @Condition_Time'), ('value', "@values")])
+                        x_range=list(reversed(metabolites)), y_range=condition_time,
+                        x_axis_location="below", plot_width=1080, plot_height=640,
+                        tools=TOOLTIPS, toolbar_location='above',
+                        tooltips=[('datapoint', '@metabolite @Condition_Time'), ('value', "@values")])
 
         myplot.grid.grid_line_color = None
         myplot.axis.axis_line_color = None
@@ -957,11 +956,11 @@ class Map:
 
         # Passons au plot
         myplot.rect(x="metabolite",
-               y="Condition_Time",
-               width=1, height=1,
-               source=df,
-               fill_color={'field': "values", 'transform': mapper},
-               line_color=None)
+                    y="Condition_Time",
+                    width=1, height=1,
+                    source=df,
+                    fill_color={'field': "values", 'transform': mapper},
+                    line_color=None)
 
         # Nous préparons la barre de couleur pour la légende
         color_bar = ColorBar(color_mapper=mapper, major_label_text_font_size="7px",

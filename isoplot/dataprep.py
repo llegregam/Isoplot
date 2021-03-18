@@ -1,4 +1,5 @@
 import logging
+import pathlib as pl
 
 import pandas as pd
 from natsort import natsorted
@@ -7,25 +8,9 @@ from natsort import natsorted
 class IsoplotData:
     """
     Class to prepare Isoplot Data for plotting
-
     
     :param datapath: Path to .csv file containing Isocor output data
     :type datapath: str
-    :param isoplot_logger: Logger object
-    :type isoplot_logger: child of logger class: 'logging.Logger'
-    :param data: Isocor output data before merge
-    :type data: Pandas DataFRame
-    :param template: User-defined template containing conditions, times,
-                    replicate numbers, etc... before merge
-    :type template: Pandas DataFrame
-    :param dfmerge: Dataframe containing merged data (template and isocor output). 
-                    Is called by prepare_data method and used by Plot class
-    :type dfmerge: Pandas DataFrame
-    
-    :raises UnicodeDecodeError: Is raised by get_template method when template file is 
-                                not .xlsx or encoding is not utf-8
-    :raises AssertionError: return error if after merge data is not of tye DataFrame
-    
     """
 
     def __init__(self, datapath):
@@ -35,7 +20,7 @@ class IsoplotData:
         self.template = None
         self.dfmerge = None
 
-        self.isoplot_logger = logging.getLogger(__name__)
+        self.isoplot_logger = logging.getLogger("Isoplot.dataprep.IsoplotData")
         stream_handle = logging.StreamHandler()
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -43,33 +28,37 @@ class IsoplotData:
         self.isoplot_logger.addHandler(stream_handle)
 
         self.isoplot_logger.debug('Initializing IsoplotData object')
-        self.isoplot_logger.info('Reading datafile {} \n'.format(
-            self.datapath))
+
+    @staticmethod
+    def read_data(path, excel_sheet=0):
+        """Function to read incoming data"""
+
+        datapath = pl.Path(path)
+
+        if datapath.suffix == ".tsv":
+            data = pd.read_csv(datapath, sep="\t", engine='python')
+
+        elif datapath.suffix == ".csv":
+            data = pd.read_csv(datapath, sep=";", engine='python')
+
+        elif datapath.suffix == ".xlsx":
+            data = pd.read_excel(datapath, engine="openpyxl", sheet_name=excel_sheet)
+
+        else:
+            raise TypeError("File extension not supported."
+                            "Supported types: '.tsv', '.csv' and '.xlsx' ")
+
+        return data
 
     def get_data(self):
 
-        """Read data from csv file and store in object data attribute."""
+        """Read data from tsv file and store in object data attribute."""
 
-        self.isoplot_logger.info("Reading file...")
+        self.isoplot_logger.info(f'Reading datafile {self.datapath} \n')
 
-        try:
-            self.isoplot_logger.debug('Trying to open csv with ";" separator')
-            self.data = pd.read_csv(self.datapath, sep=';')
-            self.data.columns[1]
-        except IndexError as _:
-            try:
-                self.isoplot_logger.debug('Trying to open csv with tabulated separator')
-                self.data = pd.read_csv(self.datapath, sep='\t')
-                self.data.columns[1]
-            except IndexError as err:
-                self.isoplot_logger.error(
-                    'There was a problem reading the file. Check that format is .csv with ";" or tabulated'
-                    "separator")
-                self.isoplot_logger.error(err)
-        else:
-            if type(self.data) is None:
-                self.isoplot_logger.error(
-                    'Dataframe is empty. Please check that file is .csv with ";" or tabulated separator')
+        self.data = IsoplotData.read_data(self.datapath)
+
+        self.isoplot_logger.info("Data is loaded")
 
     def generate_template(self):
         """Generate .xlsx template that user must fill"""
@@ -127,7 +116,7 @@ class IsoplotData:
             self.isoplot_logger.error(
                 'Merge impossible. Check column headers or file format (format must be .xlsx)')
             raise
-            
+
         else:
             self.isoplot_logger.info('Dataframes have been merged')
 
