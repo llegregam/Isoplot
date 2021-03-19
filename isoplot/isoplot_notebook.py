@@ -3,6 +3,7 @@ import datetime
 import os
 
 import ipywidgets as widgets
+import pandas as pd
 
 from isoplot.dataprep import IsoplotData
 from isoplot.plots import StaticPlot, InteractivePlot, Map
@@ -55,8 +56,14 @@ def metadatabtn_eventhandler(event):
     content = uploader.value[uploaded_filename]['content']
     with open('myfile', 'wb') as f: f.write(content)
 
-    data_object = IsoplotData(io.BytesIO(content))
-    data_object.get_data()
+    data_object = IsoplotData(None)
+    key = list(uploader.value.keys())
+
+    if key[0][-3:] == "tsv":
+        data_object.data = pd.read_csv(io.BytesIO(content), sep="\t")
+    elif key[0][-3:] == "csv":
+        data_object.data = pd.read_csv(io.BytesIO(content), sep=";")
+
     data_object.generate_template()
 
     with out:
