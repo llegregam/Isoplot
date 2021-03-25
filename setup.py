@@ -53,7 +53,7 @@ setup(
         'console_scripts': [
             'isoplot = isoplot.isoplotcli:initialize_cli',
         ]},
-    url = "https://forgemia.inra.fr/metatoul/isoplot2",
+    url = "https://github.com/LoloPopoPy/Isoplot",
     author = "Loïc Le Grégam",
     author_email = "loic.le-gregam@insa-toulouse.fr"
     

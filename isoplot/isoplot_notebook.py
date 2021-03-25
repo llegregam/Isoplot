@@ -1,6 +1,8 @@
 import io
 import datetime
 import os
+import subprocess
+import sys
 
 import ipywidgets as widgets
 import pandas as pd
@@ -15,6 +17,13 @@ class ValueHolder:
 
 vh = ValueHolder()
 
+# Check if current version is outdated
+def check(name):
+    reqs = subprocess.check_output([sys.executable, '-m', 'pip', 'list','--outdated'])
+    outdated_packages = [r.decode().split('==')[0] for r in reqs.split()]
+    if name in outdated_packages:
+        print("Your version of Isoplot is outdated. Please run 'pip install isoplot' to get the latest"
+              "version.")
 
 # Instanciation des widgets
 def make_uploader():
@@ -36,6 +45,7 @@ def make_mduploader():
 
     return mduploader
 
+check('isoplot')
 
 metadatabtn = widgets.Button(description='Create Template')
 

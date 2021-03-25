@@ -7,10 +7,13 @@ import argparse
 
 from isoplot.plots import StaticPlot, InteractivePlot, Map
 from isoplot.dataprep import IsoplotData
+from isoplot.isoplot_notebook import  import check
 
 
 def initialize_cli():
     """Initialize parser and call main function"""
+
+    check('isoplot')
 
     parser = parse_args()
     args = parser.parse_args()
