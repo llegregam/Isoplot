@@ -25,6 +25,14 @@ Reference
    :undoc-members:
    :show-inheritance:
 
+:file:`cli_process.py`
+-----------------------
+
+.. automodule:: isoplot.cli_process
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 :file:`isoplot_notebook.py`
 ---------------------------
 
@@ -32,14 +40,7 @@ Reference
    :members:
    :undoc-members: True
    :show-inheritance:
-  
-:file:`utilities.py`
------------------------
 
-.. automodule:: isoplot.utilities
-   :members:
-   :undoc-members:
-   :show-inheritance:
    
 
    

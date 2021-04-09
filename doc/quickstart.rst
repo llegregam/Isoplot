@@ -43,11 +43,7 @@ To process your data, type in a terminal :
 
 Here after the available options are enumerated and detailed.
 
-.. argparse::
-	:module: isoplot.utilities
-	:func: parseArgs
-	:prog: isoplotcli
-	:nodescription:
+TODO
 
 
 
