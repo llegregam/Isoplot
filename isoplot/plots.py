@@ -115,7 +115,7 @@ class StaticPlot(Plot):
 
         super().__init__(stack, value, data, name, metabolite, condition, time, display)
         self.fmt = fmt
-        self.static_fig_name = self.metabolite + '.' + self.fmt
+        self.static_fig_name = self.metabolite + "_" + self.value + '.' + self.fmt
 
     def stacked_areaplot(self):
         """Creation of area stackplot (for cinetic data)"""
@@ -307,13 +307,13 @@ class InteractivePlot(Plot):
     def __init__(self, stack, value, data, name, metabolite, condition, time, display):
 
         super().__init__(stack, value, data, name, metabolite, condition, time, display)
-        self.filename = self.metabolite + ".html"
+        self.filename = self.metabolite + "_" + self.value + ".html"
         self.plot_tools = "save, wheel_zoom, reset, hover, pan"
 
     def mean_enrichment_plot(self):
         """Generate interactive mean_enrichment plots"""
 
-        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+        output_file(filename=self.filename, title=self.metabolite)
 
         # Nous filtrons les données en fonction des paramètres du dashboard
         tmpdf = self.filtered_data
@@ -375,7 +375,7 @@ class InteractivePlot(Plot):
     def mean_enrichment_meanplot(self):
         """Generate interactive mean_enrichment plots with meaned replicates"""
 
-        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+        output_file(filename=self.filename, title=self.metabolite)
 
         # Nous filtrons les données en fonction des paramètres du dashboard
         tmpdf = self.filtered_data
@@ -468,7 +468,7 @@ class InteractivePlot(Plot):
     def stacked_barplot(self):
         """Generate interactive stacked barplots"""
 
-        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+        output_file(filename=self.filename + ".html", title=self.metabolite)
 
         # Nous filtrons les datas à plotter
         mydata = self.filtered_data
@@ -536,7 +536,7 @@ class InteractivePlot(Plot):
     def unstacked_barplot(self):
         """Generate interactive unstacked barplots"""
 
-        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+        output_file(filename=self.filename, title=self.metabolite)
 
         # Nous filtrons les datas à plotter
         mydata = self.filtered_data
@@ -606,7 +606,7 @@ class InteractivePlot(Plot):
     def stacked_meanplot(self):
         """Generate interactive stacked barplots with meaned replicates"""
 
-        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+        output_file(filename=self.filename + ".html", title=self.metabolite)
 
         # Nous filtrons les datas à plotter et préparons les moyennes et SD
         tmpdf = self.filtered_data
@@ -722,7 +722,7 @@ class InteractivePlot(Plot):
     def unstacked_meanplot(self):
         """Generate interactive unstacked barplots with meaned replicates"""
 
-        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+        output_file(filename=self.filename, title=self.metabolite)
 
         # Préparation des datas à plotter
         tmpdf = self.filtered_data
@@ -818,7 +818,7 @@ class InteractivePlot(Plot):
     def stacked_areaplot(self):
         """Generate interactive stacked areaplots"""
 
-        output_file(filename=self.metabolite + ".html", title=self.metabolite)
+        output_file(filename=self.filename, title=self.metabolite)
 
         # Commençons par la préparation de data
         stackdf = self.filtered_data
@@ -898,7 +898,7 @@ class Map:
         plt.yticks(rotation=0, fontsize=20)
         plt.xticks(rotation=45, fontsize=20)
         # bottom, top = ax.get_ylim()
-        plt.savefig(self.name + '.' + self.fmt, bbox_inches='tight', format=self.fmt)
+        plt.savefig(self.name + '_' + 'heatmap'+ '.' + self.fmt, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
 
@@ -916,7 +916,7 @@ class Map:
                             annot=self.annot)
         plt.setp(cg.ax_heatmap.yaxis.get_majorticklabels(), rotation=0, fontsize=20)
         plt.setp(cg.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, fontsize=20)
-        plt.savefig(self.name + '.' + self.fmt, bbox_inches='tight', format=self.fmt)
+        plt.savefig(self.name + '_' + 'clustermap'+ '.' + self.fmt, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
 
@@ -926,7 +926,7 @@ class Map:
         all conditions & times & metabolites
         """
 
-        output_file(filename=self.name + ".html", title=self.name + ".html")
+        output_file(filename=self.name +'_' + 'heatmap'+ ".html", title=self.name + ".html")
 
         condition_time = list(self.heatmapdf.index.astype(str))
         metabolites = list(self.heatmapdf.columns)

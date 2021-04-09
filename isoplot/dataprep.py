@@ -51,7 +51,6 @@ class IsoplotData:
         return data
 
     def get_data(self):
-
         """Read data from tsv file and store in object data attribute."""
 
         self.isoplot_logger.info(f'Reading datafile {self.datapath} \n')
@@ -132,6 +131,7 @@ class IsoplotData:
 
         # Nous créons ici une colonne pour identifier chaque ligne avec condition+temps+numero de répétition
         # (possibilité de rajouter un tag metabolite plus tard si besoin)
+        self.dfmerge.condition = self.dfmerge.condition.str.replace("_", "-")
         self.dfmerge['ID'] = self.dfmerge['condition'].apply(str) + '_T' + self.dfmerge['time'].apply(str) + '_' + \
                              self.dfmerge['number_rep'].apply(str)
 

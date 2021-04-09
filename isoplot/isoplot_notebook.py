@@ -18,7 +18,7 @@ class ValueHolder:
 vh = ValueHolder()
 
 # Check if current version is outdated
-def check(name):
+def check_version(name):
     reqs = subprocess.check_output([sys.executable, '-m', 'pip', 'list','--outdated'])
     outdated_packages = [r.decode().split('==')[0] for r in reqs.split()]
     if name in outdated_packages:
@@ -45,7 +45,7 @@ def make_mduploader():
 
     return mduploader
 
-check('isoplot')
+check_version('isoplot')
 
 metadatabtn = widgets.Button(description='Create Template')
 
