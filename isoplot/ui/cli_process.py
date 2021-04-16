@@ -6,9 +6,9 @@ import logging
 from pathlib import Path
 import sys
 
-from isoplot.dataprep import IsoplotData
-from isoplot.isoplotcli import IsoplotCli
-from isoplot.isoplot_notebook import check_version
+from isoplot.main.dataprep import IsoplotData
+from isoplot.ui.isoplotcli import IsoplotCli
+from isoplot.ui.isoplot_notebook import check_version
 
 
 def main():

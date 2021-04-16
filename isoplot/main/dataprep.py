@@ -29,6 +29,7 @@ class IsoplotData:
 
         self.isoplot_logger.debug('Initializing IsoplotData object')
 
+
     @staticmethod
     def read_data(path, excel_sheet=0):
         """Function to read incoming data"""
@@ -119,7 +120,7 @@ class IsoplotData:
         else:
             self.isoplot_logger.info('Dataframes have been merged')
 
-    def prepare_data(self):
+    def prepare_data(self, export=True):
         """Final cleaning of data and export"""
 
         self.isoplot_logger.debug('Preparing data after merge: normalizing...')
@@ -143,5 +144,6 @@ class IsoplotData:
         self.dfmerge['number_rep'].apply(int)
         self.dfmerge.sort_values(['condition_order', 'condition'], inplace=True)
         self.dfmerge.fillna(0, inplace=True)
-        self.dfmerge.to_excel(r'Data Export.xlsx', index=False)
+        if export:
+            self.dfmerge.to_excel(r'Data Export.xlsx', index=False)
         self.isoplot_logger.info('Data exported. Check Data Export.xlsx')

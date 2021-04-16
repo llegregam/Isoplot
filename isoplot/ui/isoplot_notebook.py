@@ -7,7 +7,7 @@ import sys
 import ipywidgets as widgets
 import pandas as pd
 
-from isoplot.dataprep import IsoplotData
+from isoplot.main.dataprep import IsoplotData
 from isoplot.plots import StaticPlot, InteractivePlot, Map
 
 
