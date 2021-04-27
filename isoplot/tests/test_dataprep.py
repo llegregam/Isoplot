@@ -2,7 +2,7 @@
 
 import pytest
 from pandas.api.types import is_numeric_dtype, is_string_dtype
-from numpy import int64, unicode_
+from numpy import int64
 
 from isoplot.main.dataprep import IsoplotData
 
@@ -55,6 +55,7 @@ def sample_names():
                     '110419_T48_AB_1_59',
                     '110419_T48_AB_2_60',
                     '110419_T48_AB_3_61']
+
     return sample_names
 
 

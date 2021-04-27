@@ -8,7 +8,7 @@ import ipywidgets as widgets
 import pandas as pd
 
 from isoplot.main.dataprep import IsoplotData
-from isoplot.plots import StaticPlot, InteractivePlot, Map
+from isoplot.main.plots import StaticPlot, InteractivePlot, Map
 
 
 class ValueHolder:
