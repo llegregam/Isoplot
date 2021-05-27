@@ -6,6 +6,9 @@ import argparse
 import zipfile
 import io
 
+from bokeh.resources import CDN
+from bokeh.embed import file_html
+
 from isoplot.main.plots import StaticPlot, InteractivePlot, Map
 
 
@@ -76,7 +79,7 @@ class IsoplotCli:
 
         self.parser.add_argument('-IB', '--interactive_barplot', action="store_true",
                                  help='Create interactive stacked barplot')
-        self.parser.add_argument('-IM', '--interactive_stacked_meanplot', action="store_true",
+        self.parser.add_argument('-IM', '--interactive_meanplot', action="store_true",
                                  help='Create interactive stacked barplot with meaned replicates')
         self.parser.add_argument('-IS', '--interactive_areaplot', action="store_true",
                                  help='Create interactive stacked areaplot')
@@ -140,7 +143,7 @@ class IsoplotCli:
         return desire
 
     @staticmethod
-    def zip_export(figures, export_path, name):
+    def zip_export(figures, name):
         """
         Function to save figures in figure list to zip file (taken from
         https://stackoverflow.com/questions/55616877/save-multiple-objects-to-zip-directly-from-memory-in-python)
@@ -153,12 +156,19 @@ class IsoplotCli:
         :type name: str
         """
 
-        zip_file_name = f"{export_path}_{name}.zip"
+        zip_file_name = f"{name}.zip"
         print(f"Creating archive: {zip_file_name}")
         with zipfile.ZipFile(zip_file_name, mode="w") as zf:
             for fig_name, fig in figures:
-                buf = io.BytesIO()
-                fig.savefig(buf)
+                if fig_name.endswith("svg"):
+                    buf = io.BytesIO()
+                    fig.savefig(buf, format="svg")
+                elif fig_name.endswith("html"):
+                    html = file_html(fig, CDN, fig_name)
+                    buf = io.StringIO(html)
+                else:
+                    buf = io.BytesIO()
+                    fig.savefig(buf)
                 print(f"Writing image {fig_name} in the archive")
                 zf.writestr(fig_name, buf.getvalue())
 
@@ -184,7 +194,7 @@ class IsoplotCli:
 
                 self.int_plot = InteractivePlot(self.args.stack, value, data_object.dfmerge,
                                                 self.args.run_name, metabolite, self.conditions, self.times,
-                                                display=False)
+                                                display=False, rtrn=rtrn)
 
                 # STATIC PLOTS
                 if self.args.stacked_areaplot:
@@ -239,50 +249,111 @@ class IsoplotCli:
 
                 # INTERACTIVE PLOTS
                 if self.args.interactive_barplot and not (value == "mean_enrichment"):
-                    self.dir_init("Interactive_barplots")
-                    self.int_plot.stacked_barplot()
+                    plot_name = "Interactive_barplots"
+                    if rtrn:
+                        fig = self.int_plot.stacked_barplot()
+                        fname = plot_name + "_" + self.int_plot.filename
+                        figures.append((fname, fig))
+                    else:
+                        self.dir_init(plot_name)
+                        self.int_plot.stacked_barplot()
 
                 if self.args.interactive_barplot and not self.args.stack:
-                    self.dir_init("Interactive_barplots")
-                    self.int_plot.unstacked_barplot()
+                    plot_name = "Interactive_unstacked_barplots"
+                    if rtrn:
+                        fig = self.int_plot.unstacked_barplot()
+                        fname = plot_name + "_" + self.int_plot.filename
+                        figures.append((fname, fig))
+                    else:
+                        self.dir_init(plot_name)
+                        self.int_plot.unstacked_barplot()
 
                 if self.args.interactive_meanplot and not (value == "mean_enrichment"):
-                    self.dir_init("Interactive_barplots_SD")
-                    self.int_plot.stacked_meanplot()
+                    plot_name = "Interactive_barplots_SD"
+                    if rtrn:
+                        fig = self.int_plot.stacked_meanplot()
+                        fname = plot_name + "_" + self.int_plot.filename
+                        figures.append((fname, fig))
+                    else:
+                        self.dir_init(plot_name)
+                        self.int_plot.stacked_meanplot()
 
                 if self.args.interactive_meanplot and not self.args.stack:
-                    self.dir_init("Interactive_barplots_SD")
-                    self.int_plot.unstacked_meanplot()
+                    plot_name = "Interactive_barplots_SD"
+                    if rtrn:
+                        fig = self.int_plot.unstacked_meanplot()
+                        fname = plot_name + "_" + self.int_plot.filename
+                        figures.append((fname, fig))
+                    else:
+                        self.dir_init(plot_name)
+                        self.int_plot.unstacked_meanplot()
 
                 if self.args.interactive_barplot and (value == "mean_enrichment"):
-                    self.dir_init("Interactive_barplots")
-                    self.int_plot.mean_enrichment_plot()
+                    plot_name = "Interactive_barplots"
+                    if rtrn:
+                        fig = self.int_plot.mean_enrichment_plot()
+                        fname = plot_name + "_" + self.int_plot.filename
+                        figures.append((fname, fig))
+                    else:
+                        self.dir_init(plot_name)
+                        self.int_plot.mean_enrichment_plot()
 
                 if self.args.interactive_meanplot and (value == "mean_enrichment"):
-                    self.dir_init("Interactive_barplots_SD")
-                    self.int_plot.mean_enrichment_meanplot()
+                    plot_name = "Interactive_barplots_SD"
+                    if rtrn:
+                        fig = self.int_plot.mean_enrichment_meanplot()
+                        fname = plot_name + "_" + self.int_plot.filename
+                        figures.append((fname, fig))
+                    else:
+                        self.dir_init(plot_name)
+                        self.int_plot.mean_enrichment_meanplot()
 
                 if self.args.interactive_areaplot:
-                    self.dir_init("Interactive_stackplots")
-                    self.int_plot.stacked_areaplot()
+                    plot_name = "Interactive_stackplots"
+                    if rtrn:
+                        fig = self.int_plot.stacked_areaplot()
+                        fname = plot_name + "_" + self.int_plot.filename
+                        figures.append((fname, fig))
+                    else:
+                        self.dir_init(plot_name)
+                        self.int_plot.stacked_areaplot()
 
         # MAPS
-        self.map = Map(data_object.dfmerge, self.args.run_name, self.args.annot, self.args.format)
+        self.map = Map(data_object.dfmerge, self.args.run_name, self.args.annot, self.args.format, rtrn=rtrn)
 
         if self.args.static_heatmap:
-            self.dir_init("Maps")
-            self.map.build_heatmap()
+            plot_name = "static_heatmap"
+            if rtrn:
+                fig = self.map.build_heatmap()
+                fname = plot_name + f".{self.map.fmt}"
+                figures.append((fname, fig))
+            else:
+                self.dir_init(plot_name)
+                self.map.build_heatmap()
 
         if self.args.static_clustermap:
-            self.dir_init("Maps")
-            self.map.build_clustermap()
+            plot_name = "static_clustermap"
+            if rtrn:
+                fig = self.map.build_clustermap()
+                fname = plot_name + f".{self.map.fmt}"
+                figures.append((fname, fig))
+            else:
+                self.dir_init(plot_name)
+                self.map.build_clustermap()
 
         if self.args.interactive_heatmap:
-            self.dir_init("Maps")
-            self.map.build_interactive_heatmap()
+            self.map.fmt = "html"
+            plot_name = "interactive_heatmap"
+            if rtrn:
+                fig = self.map.build_interactive_heatmap()
+                fname = plot_name + f".{self.map.fmt}"
+                figures.append((fname, fig))
+            else:
+                self.dir_init(plot_name)
+                self.map.build_interactive_heatmap()
 
         if rtrn:
-            IsoplotCli.zip_export(figures, self.run_home, self.args.run_name)
+            IsoplotCli.zip_export(figures, self.args.run_name)
 
         self.go_home()
 
