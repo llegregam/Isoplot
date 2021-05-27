@@ -3,9 +3,6 @@ generate the desired plots"""
 
 import os
 import argparse
-import zipfile
-import io
-
 from isoplot.main.plots import StaticPlot, InteractivePlot, Map
 
 
@@ -94,8 +91,6 @@ class IsoplotCli:
                                  help='Turns logger to debug mode')
         self.parser.add_argument('-a', '--annot', action='store_true',
                                  help='Add option if annotations should be added on maps')
-        self.parser.add_argument('-z', '--zip', action="store_true",
-                                 help="Add option to export plots in zip file")
 
     @staticmethod
     def get_cli_input(arg, param, data_object):
@@ -139,48 +134,15 @@ class IsoplotCli:
                     is_error = False
         return desire
 
-    @staticmethod
-    def zip_export(figures, export_path, name):
-        """
-        Function to save figures in figure list to zip file (taken from
-        https://stackoverflow.com/questions/55616877/save-multiple-objects-to-zip-directly-from-memory-in-python)
-
-        :param figures: storage of figures and their respective file names in tuples: (name, fig)
-        :type figures: list of tuples
-        :param export_path: path to export location
-        :type export_path: str
-        :param name: name of the exported zip file
-        :type name: str
-        """
-
-        zip_file_name = f"{export_path}_{name}.zip"
-        print(f"Creating archive: {zip_file_name}")
-        with zipfile.ZipFile(zip_file_name, mode="w") as zf:
-            for fig_name, fig in figures:
-                buf = io.BytesIO()
-                fig.savefig(buf)
-                print(f"Writing image {fig_name} in the archive")
-                zf.writestr(fig_name, buf.getvalue())
-
-    def plot_figs(self, metabolite_list, data_object, rtrn):
-        """
-        Function to control which plot methods are called depending on the
-        arguments that were parsed
-
-        :param metabolite_list: metabolites to be plotted
-        :type metabolite_list: list of str
-        :param data_object: object containing the prepared data
-        :type data_object: class: 'isoplot.main.dataprep.IsoplotData'
-        """
-
-        if rtrn:
-            figures = []
+    def plot_figs(self, metabolite_list, data_object):
+        """Function to control which plot methods are called depending on the
+            arguments that were parsed"""
 
         for metabolite in metabolite_list:
             for value in self.args.value:
                 self.static_plot = StaticPlot(self.args.stack, value, data_object.dfmerge,
                                               self.args.run_name, metabolite, self.conditions, self.times,
-                                              self.args.format, display=False, rtrn=rtrn)
+                                              self.args.format, display=False)
 
                 self.int_plot = InteractivePlot(self.args.stack, value, data_object.dfmerge,
                                                 self.args.run_name, metabolite, self.conditions, self.times,
@@ -188,54 +150,24 @@ class IsoplotCli:
 
                 # STATIC PLOTS
                 if self.args.stacked_areaplot:
-                    plot_name = "Static_Areaplots"
-                    if rtrn:
-                        fig = self.static_plot.stacked_areaplot()
-                        fname = plot_name + "_" + self.static_plot.static_fig_name
-                        figures.append((fname, fig))
-                    else:
-                        self.dir_init(plot_name)
-                        self.static_plot.stacked_areaplot()
+                    self.dir_init("Static_Areaplots")
+                    self.static_plot.stacked_areaplot()
 
                 if self.args.barplot and not (value == "mean_enrichment"):
-                    plot_name = "Static_barplots"
-                    if rtrn:
-                        fig = self.static_plot.barplot()
-                        fname = plot_name + "_" + self.static_plot.static_fig_name
-                        figures.append((fname, fig))
-                    else:
-                        self.dir_init(plot_name)
-                        self.static_plot.barplot()
+                    self.dir_init("Static_barplots")
+                    self.static_plot.barplot()
 
                 if self.args.meaned_barplot and not (value == "mean_enrichment"):
-                    plot_name = "Static_barplots_SD"
-                    if rtrn:
-                        fig = self.static_plot.mean_barplot()
-                        fname = plot_name + "_" + self.static_plot.static_fig_name
-                        figures.append((fname, fig))
-                    else:
-                        self.dir_init(plot_name)
-                        self.static_plot.mean_barplot()
+                    self.dir_init("Static_barplots_SD")
+                    self.static_plot.mean_barplot()
 
                 if self.args.barplot and (value == "mean_enrichment"):
-                    plot_name = "Static_barplots"
-                    if rtrn:
-                        fig = self.static_plot.mean_enrichment_plot()
-                        fname = plot_name + "_" + self.static_plot.static_fig_name
-                        figures.append((fname, fig))
-                    else:
-                        self.dir_init(plot_name)
-                        self.static_plot.mean_enrichment_plot()
+                    self.dir_init("Static_barplots")
+                    self.static_plot.mean_enrichment_plot()
 
                 if self.args.meaned_barplot and (value == "mean_enrichment"):
-                    plot_name = "Static_barplots_SD"
-                    if rtrn:
-                        fig = self.static_plot.mean_enrichment_meanplot()
-                        fname = plot_name + "_" + self.static_plot.static_fig_name
-                        figures.append((fname, fig))
-                    else:
-                        self.dir_init(plot_name)
-                        self.static_plot.mean_enrichment_meanplot()
+                    self.dir_init("Static_barplots_SD")
+                    self.static_plot.mean_enrichment_meanplot()
 
                 # INTERACTIVE PLOTS
                 if self.args.interactive_barplot and not (value == "mean_enrichment"):
@@ -280,9 +212,6 @@ class IsoplotCli:
         if self.args.interactive_heatmap:
             self.dir_init("Maps")
             self.map.build_interactive_heatmap()
-
-        if rtrn:
-            IsoplotCli.zip_export(figures, self.run_home, self.args.run_name)
 
         self.go_home()
 

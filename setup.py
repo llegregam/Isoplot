@@ -51,7 +51,7 @@ setup(
     },
 	entry_points = {
         'console_scripts': [
-            'isoplot = isoplot.cli_process:main',
+            'isoplot = isoplot.main.cli_process:main',
         ]},
     url = "https://github.com/LoloPopoPy/Isoplot",
     author = "Loïc Le Grégam",

@@ -39,16 +39,12 @@ class Plot:
     :type condition: list
     :param time: List of times to be plotted
     :type time: list
-    :param display: Should plots be displayed when created
-    :type display: Bool
-    :param rtrn: Should figure object be returned or not
-    :type rtrn: Bool
     """
 
     WIDTH = 1080
     HEIGHT = 640
 
-    def __init__(self, stack, value, data, name, metabolite, condition, time, display, rtrn=False):
+    def __init__(self, stack, value, data, name, metabolite, condition, time, display):
 
         self.stack = stack
         self.value = value
@@ -58,7 +54,6 @@ class Plot:
         self.condition = condition
         self.time = time
         self.display = display
-        self.rtrn = rtrn
         self.filtered_data = self.data[
             (self.data['metabolite'] == self.metabolite) &
             (self.data['condition'].isin(self.condition)) &
@@ -116,9 +111,9 @@ class StaticPlot(Plot):
     """
 
     def __init__(self, stack, value, data, name, metabolite,
-                 condition, time, fmt, display, rtrn):
+                 condition, time, fmt, display):
 
-        super().__init__(stack, value, data, name, metabolite, condition, time, display, rtrn)
+        super().__init__(stack, value, data, name, metabolite, condition, time, display)
         self.fmt = fmt
         self.static_fig_name = self.metabolite + "_" + self.value + '.' + self.fmt
 
@@ -146,10 +141,8 @@ class StaticPlot(Plot):
         plt.xticks(rotation=45)
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.tight_layout()
-        if rtrn:
-            fig = plt.gcf()
-            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
+
         if self.display:
             plt.show()
         else:
@@ -182,9 +175,6 @@ class StaticPlot(Plot):
                            horizontalalignment='right')
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.tight_layout()
-        if rtrn:
-            fig = ax.get_figure()
-            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
@@ -223,9 +213,6 @@ class StaticPlot(Plot):
         this_ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.xticks(rotation=45)
         plt.tight_layout()
-        if rtrn:
-            fig = this_ax.get_figure()
-            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
@@ -261,9 +248,6 @@ class StaticPlot(Plot):
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.tight_layout()
-        if rtrn:
-            fig = ax.get_figure()
-            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
@@ -310,9 +294,6 @@ class StaticPlot(Plot):
         this_ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.xticks(rotation=45)
         plt.tight_layout()
-        if rtrn:
-            fig = this_ax.get_figure()
-            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
