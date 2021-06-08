@@ -86,6 +86,9 @@ class IsoplotData:
             self.isoplot_logger.debug('Trying to read template')
             self.template = IsoplotData.read_data(path)
 
+        except TypeError:
+            self.template = pd.read_excel(path, engine='openpyxl')
+
         except UnicodeDecodeError as uni:
             self.isoplot_logger.error(uni)
             self.isoplot_logger.error(
