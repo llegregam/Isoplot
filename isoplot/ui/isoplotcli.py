@@ -100,6 +100,9 @@ class IsoplotCli:
         self.parser.add_argument('-z', '--zip', action="store_true",
                                  help="Add option to export plots in zip file")
 
+        self.parser.add_argument('-g', '--galaxy', action='store_true',
+                                 help='Option for galaxy integration. Not useful for local usage')
+
     @staticmethod
     def get_cli_input(arg, param, data_object):
         """
@@ -354,8 +357,8 @@ class IsoplotCli:
 
         if rtrn:
             IsoplotCli.zip_export(figures, self.args.run_name)
-
-        self.go_home()
+        if not self.args.galaxy:
+            self.go_home()
 
     def initialize_cli(self):
         """Launch argument parsing and perform checks"""

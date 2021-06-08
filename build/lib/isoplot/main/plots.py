@@ -39,12 +39,16 @@ class Plot:
     :type condition: list
     :param time: List of times to be plotted
     :type time: list
+    :param display: Should plots be displayed when created
+    :type display: Bool
+    :param rtrn: Should figure object be returned or not
+    :type rtrn: Bool
     """
 
     WIDTH = 1080
     HEIGHT = 640
 
-    def __init__(self, stack, value, data, name, metabolite, condition, time, display):
+    def __init__(self, stack, value, data, name, metabolite, condition, time, display, rtrn=False):
 
         self.stack = stack
         self.value = value
@@ -54,6 +58,7 @@ class Plot:
         self.condition = condition
         self.time = time
         self.display = display
+        self.rtrn = rtrn
         self.filtered_data = self.data[
             (self.data['metabolite'] == self.metabolite) &
             (self.data['condition'].isin(self.condition)) &
@@ -111,9 +116,9 @@ class StaticPlot(Plot):
     """
 
     def __init__(self, stack, value, data, name, metabolite,
-                 condition, time, fmt, display):
+                 condition, time, fmt, display, rtrn):
 
-        super().__init__(stack, value, data, name, metabolite, condition, time, display)
+        super().__init__(stack, value, data, name, metabolite, condition, time, display, rtrn)
         self.fmt = fmt
         self.static_fig_name = self.metabolite + "_" + self.value + '.' + self.fmt
 
@@ -141,8 +146,10 @@ class StaticPlot(Plot):
         plt.xticks(rotation=45)
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.tight_layout()
+        if self.rtrn:
+            fig = plt.gcf()
+            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
-
         if self.display:
             plt.show()
         else:
@@ -175,6 +182,9 @@ class StaticPlot(Plot):
                            horizontalalignment='right')
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.tight_layout()
+        if self.rtrn:
+            fig = ax.get_figure()
+            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
@@ -213,6 +223,9 @@ class StaticPlot(Plot):
         this_ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.xticks(rotation=45)
         plt.tight_layout()
+        if self.rtrn:
+            fig = this_ax.get_figure()
+            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
@@ -248,6 +261,9 @@ class StaticPlot(Plot):
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.tight_layout()
+        if self.rtrn:
+            fig = ax.get_figure()
+            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
@@ -294,6 +310,9 @@ class StaticPlot(Plot):
         this_ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.xticks(rotation=45)
         plt.tight_layout()
+        if self.rtrn:
+            fig = this_ax.get_figure()
+            return fig
         plt.savefig(self.static_fig_name, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
@@ -304,9 +323,9 @@ class StaticPlot(Plot):
 class InteractivePlot(Plot):
     """Class to generate the different interactive plots"""
 
-    def __init__(self, stack, value, data, name, metabolite, condition, time, display):
+    def __init__(self, stack, value, data, name, metabolite, condition, time, display, rtrn):
 
-        super().__init__(stack, value, data, name, metabolite, condition, time, display)
+        super().__init__(stack, value, data, name, metabolite, condition, time, display, rtrn)
         self.filename = self.metabolite + "_" + self.value + ".html"
         self.plot_tools = "save, wheel_zoom, reset, hover, pan"
 
@@ -367,6 +386,8 @@ class InteractivePlot(Plot):
                     source=source)
 
         myplot.xaxis.major_label_orientation = math.pi / 4
+        if self.rtrn:
+            return myplot
         if self.display:
             show(myplot)
         else:
@@ -460,6 +481,8 @@ class InteractivePlot(Plot):
         myplot.add_layout(mywhisker)
 
         myplot.xaxis.major_label_orientation = math.pi / 4
+        if self.rtrn:
+            return myplot
         if self.display:
             show(myplot)
         else:
@@ -527,6 +550,9 @@ class InteractivePlot(Plot):
                           )
 
         myplot.xaxis.major_label_orientation = math.pi / 4
+
+        if self.rtrn:
+            return myplot
 
         if self.display:
             show(myplot)
@@ -598,6 +624,8 @@ class InteractivePlot(Plot):
         myplot.xaxis.major_label_orientation = math.pi / 4
         myplot.y_range.start = 0
         myplot.x_range.range_padding = 0.1
+        if self.rtrn:
+            return myplot
         if self.display:
             show(myplot)
         else:
@@ -714,6 +742,8 @@ class InteractivePlot(Plot):
             myplot.add_layout(mywhisker)
 
         myplot.xaxis.major_label_orientation = math.pi / 4
+        if self.rtrn:
+            return myplot
         if self.display:
             show(myplot)
         else:
@@ -810,6 +840,8 @@ class InteractivePlot(Plot):
             lower="lower", level="overlay"))
         myplot.y_range.start = 0
         myplot.x_range.range_padding = 0.1
+        if self.rtrn:
+            return myplot
         if self.display:
             show(myplot)
         else:
@@ -844,6 +876,8 @@ class InteractivePlot(Plot):
 
         myplot.xaxis.major_label_orientation = math.pi / 4
         myplot.varea_stack(mystackers, x="ID", color=colors, source=mysource)
+        if self.rtrn:
+            return myplot
         if self.display:
             show(myplot)
         else:
@@ -858,13 +892,14 @@ class Map:
     :type annot: Bool
     """
 
-    def __init__(self, data, name, annot, fmt, display=False):
+    def __init__(self, data, name, annot, fmt, display=False, rtrn=False):
 
         self.data = data
         self.name = name
         self.annot = annot
         self.fmt = fmt
         self.display = display
+        self.rtrn = rtrn
 
         # Il faut préparer les données pour les maps:
         self.heatmapdf = self.data[
@@ -898,6 +933,8 @@ class Map:
         plt.yticks(rotation=0, fontsize=20)
         plt.xticks(rotation=45, fontsize=20)
         # bottom, top = ax.get_ylim()
+        if self.rtrn:
+            return fig
         plt.savefig(self.name + '_' + 'heatmap'+ '.' + self.fmt, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
@@ -916,6 +953,9 @@ class Map:
                             annot=self.annot)
         plt.setp(cg.ax_heatmap.yaxis.get_majorticklabels(), rotation=0, fontsize=20)
         plt.setp(cg.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, fontsize=20)
+        if self.rtrn:
+            fig = plt.gcf()
+            return fig
         plt.savefig(self.name + '_' + 'clustermap'+ '.' + self.fmt, bbox_inches='tight', format=self.fmt)
         if self.display:
             plt.show()
@@ -971,6 +1011,8 @@ class Map:
         # Ajoutons la barre de couleur de la légende
         myplot.add_layout(color_bar, 'right')
 
+        if self.rtrn:
+            return myplot
         if self.display:
             show(myplot)
         else:

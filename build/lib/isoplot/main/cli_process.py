@@ -106,7 +106,7 @@ def main():
 
     logger.info("Creating plots...")
     try:
-        cli.plot_figs(cli.metabolites, data)
+        cli.plot_figs(cli.metabolites, data, cli.args.zip)
     except Exception:
         logger.exception("There was a problem during the creation of the plots")
     else:
