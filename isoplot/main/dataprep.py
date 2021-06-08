@@ -83,8 +83,8 @@ class IsoplotData:
         self.isoplot_logger.info("Reading template...")
 
         try:
-            self.isoplot_logger.debug('Trying to read excel template')
-            self.template = pd.read_excel(path, engine='openpyxl')
+            self.isoplot_logger.debug('Trying to read template')
+            self.template = IsoplotData.read_data(path)
 
         except UnicodeDecodeError as uni:
             self.isoplot_logger.error(uni)
@@ -145,5 +145,5 @@ class IsoplotData:
         self.dfmerge.sort_values(['condition_order', 'condition'], inplace=True)
         self.dfmerge.fillna(0, inplace=True)
         if export:
-            self.dfmerge.to_excel(r'Data Export.xlsx', index=False)
-        self.isoplot_logger.info('Data exported. Check Data Export.xlsx')
+            self.dfmerge.to_csv(r'Data_Export.csv', index=False)
+        self.isoplot_logger.info('Data exported. Check Data_Export.csv')

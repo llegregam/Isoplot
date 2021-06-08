@@ -12,28 +12,31 @@ from isoplot.ui.isoplot_notebook import check_version
 
 
 def main():
-
-    # We start by checking the version of isoplot
+    # We start by checking the version of isoplot before cli initialization
     check_version('isoplot')
 
     cli = IsoplotCli()
     cli.initialize_cli()
-    # Initialize path to root directory (directory containing data file)
-    cli.home = Path(cli.args.input_path).parents[0]
+    if not cli.args.galaxy:
+        # Initialize path to root directory (directory containing data file)
+        cli.home = Path(cli.args.input_path).parents[0]
 
     # Get time and date for the run directory name
     now = datetime.datetime.now()
     date_time = now.strftime("%d%m%Y_%Hh%Mmn")
-
-    # Initialize run name and run directory
-    run_name = cli.args.run_name + "_" + date_time
-    cli.run_home = cli.home / run_name
-    cli.run_home.mkdir()
+    if not cli.args.galaxy:
+        # Initialize run name and run directory
+        run_name = cli.args.run_name + "_" + date_time
+        cli.run_home = cli.home / run_name
+        cli.run_home.mkdir()
 
     # Prepare logger
     logger = logging.getLogger("Isoplot.isoplotcli")
     handle = logging.StreamHandler()
-    fhandle = logging.FileHandler(cli.run_home / "debug.log") # Log debug output to file
+    if not cli.args.galaxy:
+        fhandle = logging.FileHandler(cli.run_home / "debug.log")  # Log debug output to file
+    else:
+        fhandle = logging.FileHandler("debug.log")
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handle.setFormatter(formatter)
     fhandle.setFormatter(formatter)
@@ -62,8 +65,8 @@ def main():
         else:
             logger.info(f"Template has been generated. Check destination folder at {cli.home}")
             sys.exit()
-
-    os.chdir(cli.run_home)
+    if not cli.args.galaxy:
+        os.chdir(cli.run_home)
 
     if hasattr(cli.args, 'template_path'):
         try:
@@ -108,7 +111,9 @@ def main():
         logger.exception("There was a problem during the creation of the plots")
     else:
         logger.info("Plots created. Run is terminated")
-        sys.exit()
+        if not cli.args.galaxy:
+            sys.exit()
+
 
 if __name__ == "__main__":
     main()

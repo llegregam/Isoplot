@@ -92,6 +92,9 @@ class IsoplotCli:
         self.parser.add_argument('-a', '--annot', action='store_true',
                                  help='Add option if annotations should be added on maps')
 
+        self.parser.add_argument('-g', '--galaxy', action='store_true',
+                                 help='Option for galaxy integration. Not useful for local usage')
+
     @staticmethod
     def get_cli_input(arg, param, data_object):
         """
@@ -213,7 +216,10 @@ class IsoplotCli:
             self.dir_init("Maps")
             self.map.build_interactive_heatmap()
 
-        self.go_home()
+        if rtrn:
+            IsoplotCli.zip_export(figures, self.args.run_name)
+        if not self.args.galaxy:
+            self.go_home()
 
     def initialize_cli(self):
         """Launch argument parsing and perform checks"""

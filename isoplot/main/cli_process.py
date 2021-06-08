@@ -34,9 +34,9 @@ def main():
     logger = logging.getLogger("Isoplot.isoplotcli")
     handle = logging.StreamHandler()
     if not cli.args.galaxy:
-        fhandle = logging.FileHandler(cli.run_home / "debug.log")  # Log debug output to file
+        fhandle = logging.FileHandler(cli.run_home / "run_info.txt")  # Log run info to txt file
     else:
-        fhandle = logging.FileHandler("debug.log")
+        fhandle = logging.FileHandler("run_info.txt")
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handle.setFormatter(formatter)
     fhandle.setFormatter(formatter)

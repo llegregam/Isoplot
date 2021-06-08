@@ -1,0 +1,38 @@
+2021-06-07 17:14:34,963 - Isoplot.isoplotcli - DEBUG - Generate Data Object
+2021-06-07 17:14:35,001 - Isoplot.isoplotcli - DEBUG - Loading template
+2021-06-07 17:14:35,003 - Isoplot.isoplotcli - DEBUG - Merging data
+2021-06-07 17:14:35,014 - Isoplot.isoplotcli - DEBUG - Preparing data
+2021-06-07 17:14:38,166 - Isoplot.isoplotcli - INFO - -------------------------------
+2021-06-07 17:14:38,167 - Isoplot.isoplotcli - INFO - Cli has been initialized. Parameters are as follows
+2021-06-07 17:14:38,167 - Isoplot.isoplotcli - INFO - Run name: galaxy
+2021-06-07 17:14:38,167 - Isoplot.isoplotcli - INFO - Input data path: C:\Users\legregam\Documents\Projets\Isoplot\Isoplot2\isoplot\tests\test_data\160419_T_Daubon_MC_principale_res.csv
+2021-06-07 17:14:38,169 - Isoplot.isoplotcli - INFO - Template path: C:\Users\legregam\Documents\Projets\Isoplot\Isoplot2\isoplot\tests\test_data\modified_for_testing.csv
+2021-06-07 17:14:38,169 - Isoplot.isoplotcli - INFO - Chosen format: jpeg
+2021-06-07 17:14:38,170 - Isoplot.isoplotcli - INFO - Data to plot: ['isotopologue_fraction']
+2021-06-07 17:14:38,170 - Isoplot.isoplotcli - INFO - Chosen metabolites: ['2_3-PG' '2-OHGLu' '6-PG' 'a-KG' 'Cit' 'Fru6P' 'FruBP' 'Fru1P' 'Fum'
+ 'Glc6P' 'Gly3P' 'IsoCit' 'Mal' 'P5P' 'PEP' 'PRPP' 'Pyr' 'Rib1P' 'Sed7P'
+ 'Suc']
+2021-06-07 17:14:38,170 - Isoplot.isoplotcli - INFO - Chosen conditions: ['Cont' 'B' 'AB' 'A']
+2021-06-07 17:14:38,171 - Isoplot.isoplotcli - INFO - Chosen times: [ 0 24 48]
+2021-06-07 17:14:38,171 - Isoplot.isoplotcli - INFO - -------------------------------
+2021-06-07 17:14:38,171 - Isoplot.isoplotcli - INFO - Creating plots...
+2021-06-07 17:15:01,959 - Isoplot.isoplotcli - INFO - Plots created. Run is terminated
+2021-06-07 17:16:19,254 - Isoplot.isoplotcli - DEBUG - Generate Data Object
+2021-06-07 17:16:19,283 - Isoplot.isoplotcli - DEBUG - Loading template
+2021-06-07 17:16:19,285 - Isoplot.isoplotcli - DEBUG - Merging data
+2021-06-07 17:16:19,291 - Isoplot.isoplotcli - DEBUG - Preparing data
+2021-06-07 17:16:21,462 - Isoplot.isoplotcli - INFO - -------------------------------
+2021-06-07 17:16:21,463 - Isoplot.isoplotcli - INFO - Cli has been initialized. Parameters are as follows
+2021-06-07 17:16:21,463 - Isoplot.isoplotcli - INFO - Run name: galaxy
+2021-06-07 17:16:21,463 - Isoplot.isoplotcli - INFO - Input data path: C:\Users\legregam\Documents\Projets\Isoplot\Isoplot2\isoplot\tests\test_data\160419_T_Daubon_MC_principale_res.csv
+2021-06-07 17:16:21,464 - Isoplot.isoplotcli - INFO - Template path: C:\Users\legregam\Documents\Projets\Isoplot\Isoplot2\isoplot\tests\test_data\modified_for_testing.csv
+2021-06-07 17:16:21,464 - Isoplot.isoplotcli - INFO - Chosen format: jpeg
+2021-06-07 17:16:21,464 - Isoplot.isoplotcli - INFO - Data to plot: ['isotopologue_fraction']
+2021-06-07 17:16:21,465 - Isoplot.isoplotcli - INFO - Chosen metabolites: ['2_3-PG' '2-OHGLu' '6-PG' 'a-KG' 'Cit' 'Fru6P' 'FruBP' 'Fru1P' 'Fum'
+ 'Glc6P' 'Gly3P' 'IsoCit' 'Mal' 'P5P' 'PEP' 'PRPP' 'Pyr' 'Rib1P' 'Sed7P'
+ 'Suc']
+2021-06-07 17:16:21,465 - Isoplot.isoplotcli - INFO - Chosen conditions: ['Cont' 'B' 'AB' 'A']
+2021-06-07 17:16:21,465 - Isoplot.isoplotcli - INFO - Chosen times: [ 0 24 48]
+2021-06-07 17:16:21,466 - Isoplot.isoplotcli - INFO - -------------------------------
+2021-06-07 17:16:21,466 - Isoplot.isoplotcli - INFO - Creating plots...
+2021-06-07 17:16:45,090 - Isoplot.isoplotcli - INFO - Plots created. Run is terminated
