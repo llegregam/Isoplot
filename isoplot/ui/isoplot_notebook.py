@@ -17,13 +17,15 @@ class ValueHolder:
 
 vh = ValueHolder()
 
+
 # Check if current version is outdated
 def check_version(name):
-    reqs = subprocess.check_output([sys.executable, '-m', 'pip', 'list','--outdated'])
+    reqs = subprocess.check_output([sys.executable, '-m', 'pip', 'list', '--outdated'])
     outdated_packages = [r.decode().split('==')[0] for r in reqs.split()]
     if name in outdated_packages:
         print("Your version of Isoplot is outdated. Please run 'pip install isoplot' to get the latest"
               "version.")
+
 
 # Instanciation des widgets
 def make_uploader():
@@ -45,6 +47,7 @@ def make_mduploader():
 
     return mduploader
 
+
 check_version('isoplot')
 
 metadatabtn = widgets.Button(description='Create Template')
@@ -64,7 +67,8 @@ def metadatabtn_eventhandler(event):
 
     uploaded_filename = next(iter(uploader.value))
     content = uploader.value[uploaded_filename]['content']
-    with open('myfile', 'wb') as f: f.write(content)
+    with open('myfile', 'wb') as f:
+        f.write(content)
 
     data_object = IsoplotData(None)
     key = list(uploader.value.keys())
@@ -87,8 +91,7 @@ def dataprep_eventhandler(event):
     mduploaded_filename = next(iter(mduploader.value))
     content = mduploader.value[mduploaded_filename]['content']
     with open('myfile', 'wb') as f: f.write(content)
-
-    data_object.get_template(io.BytesIO(content))
+    data_object.get_template(content)
     data_object.merge_data()
     data_object.prepare_data()
     vh.dfmerge = data_object.dfmerge
@@ -114,7 +117,7 @@ def indiplot(stack, value, data, name, metabolites, conditions, times, fmt, disp
     for metabolite in metabolites:
 
         plotter = StaticPlot(stack, value, data, name, metabolite, conditions, times, fmt,
-                             display=display)
+                             display=display, rtrn=False)
 
         if value != 'mean_enrichment':
             if stackplot == True:
@@ -138,7 +141,7 @@ def meanplot(stack, value, data, name, metabolites, conditions, times, fmt, disp
     for metabolite in metabolites:
 
         plotter = StaticPlot(stack, value, data, name, metabolite, conditions, times, fmt,
-                             display=display)
+                             display=display, rtrn=False)
 
         if value != 'mean_enrichment':
             plotter.mean_barplot()
@@ -163,7 +166,7 @@ def indibokplot(stack, value, data, name, metabolites, conditions, times, displa
             name = metabolite
 
         plotter = InteractivePlot(stack, value, data, name, metabolite, conditions, times,
-                                  display=display)
+                                  display=display, rtrn=False)
 
         # Le cas du mean enrichment est différent car les valeurs sont en double à la sortie d'Isocor
         if value != 'mean_enrichment':
@@ -198,7 +201,7 @@ def meanbokplot(stack, value, data, name, metabolites, conditions, times, displa
             name = metabolite
 
         plotter = InteractivePlot(stack, value, data, name, metabolite, conditions, times,
-                                  display=display)
+                                  display=display, rtrn=False)
 
         if value != 'mean_enrichment':  # Le cas du mean enrichment est différent car les valeurs sont en double à la sortie d'Isocor
 

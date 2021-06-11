@@ -21,7 +21,7 @@ project = 'Isoplot'
 copyright = '2020, Loïc LE GREGAM'
 author = 'Loïc LE GREGAM'
 
-full_version = '1.2.3'
+full_version = '1.2.4'
 release = full_version
 
 

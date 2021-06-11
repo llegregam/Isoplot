@@ -1,3 +1,4 @@
+import io
 import logging
 import pathlib as pl
 
@@ -13,51 +14,106 @@ class IsoplotData:
     :type datapath: str
     """
 
-    def __init__(self, datapath):
+    def __init__(self, datapath, verbose=False):
 
         self.datapath = datapath
+        self.verbose = verbose
         self.data = None
         self.template = None
         self.dfmerge = None
 
         self.isoplot_logger = logging.getLogger("Isoplot.dataprep.IsoplotData")
+        self.isoplot_logger.setLevel(logging.DEBUG)
         stream_handle = logging.StreamHandler()
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         stream_handle.setFormatter(formatter)
+        if self.verbose:
+            stream_handle.setLevel(logging.DEBUG)
+        else:
+            stream_handle.setLevel(logging.INFO)
         self.isoplot_logger.addHandler(stream_handle)
 
         self.isoplot_logger.debug('Initializing IsoplotData object')
 
-
     @staticmethod
-    def read_data(path, excel_sheet=0):
+    def load_isocor_data(path):
         """Function to read incoming data"""
 
         datapath = pl.Path(path)
 
-        if datapath.suffix == ".tsv":
-            data = pd.read_csv(datapath, sep="\t", engine='python')
-
-        elif datapath.suffix == ".csv":
-            data = pd.read_csv(datapath, sep=";", engine='python')
-
-        elif datapath.suffix == ".xlsx":
-            data = pd.read_excel(datapath, engine="openpyxl", sheet_name=excel_sheet)
-
-        else:
-            raise TypeError("File extension not supported."
-                            "Supported types: '.tsv', '.csv' and '.xlsx' ")
-
+        if not datapath.is_file():
+            raise ValueError("No data file selected")
+        try:
+            with open(str(datapath), 'r', encoding='utf-8') as dp:
+                data = pd.read_csv(dp, sep='\t')
+                if len(data.columns) == 1:
+                    del data
+                    with open(str(datapath), 'r', encoding='utf-8') as dp:
+                        data = pd.read_csv(dp, sep=";")
+        except Exception as err:
+            raise ValueError(f"Error during the lecture of the file {path}. Please make sure file is tsv or csv. "
+                             f"Traceback: {err}")
+        to_check = ['sample', 'metabolite', 'isotopologue', 'area', 'corrected_area', 'isotopologue_fraction',
+                    'mean_enrichment']
+        for i in to_check:
+            if i not in data.columns:
+                raise ValueError(f"Column {i} not found in data file {path}")
         return data
+
+    @staticmethod
+    def load_template(input_data, excel_sheet=0):
+        """Function to read incoming template data"""
+
+        # Since the template can be in excel format, when input comes from upload button in the notebook it is a
+        # bytes file. So we check and handle this here
+        if isinstance(input_data, bytes):
+            toread = io.BytesIO()
+            toread.write(input_data)
+            toread.seek(0)
+            try:
+                data = pd.read_excel(input_data, engine='openpyxl', sheet_name=excel_sheet)
+            except ValueError:
+                data = pd.read_csv(input_data, sep=";")
+                if len(data.columns) == 1:
+                    del data
+                    data = pd.read_csv(input_data, sep="\t")
+                return data
+            except Exception as ex:
+                raise ValueError(f"There was a problem while processing the input template. Traceback: {ex}")
+            else:
+                return data
+        else:
+            datapath = pl.Path(input_data)
+            if not datapath.is_file():
+                raise ValueError("No data file selected")
+            try:
+                data = pd.read_excel(datapath, engine='openpyxl', sheet_name=excel_sheet)
+            except ValueError:
+                try:
+                    with open(str(datapath), 'r', encoding='utf-8') as dp:
+                        data = pd.read_csv(dp, sep=";")
+                        if len(data.columns) == 1:
+                            del data
+                            data = pd.read_csv(dp, sep="\t")
+                except Exception as err:
+                    raise ValueError(
+                        f"Error during the lecture of the template file {input_data}. "
+                        f"Please check file content and format. Traceback: {err}")
+            to_check = ['sample', 'condition', 'condition_order', 'time', 'number_rep', 'normalization']
+            for i in to_check:
+                if i not in data.columns:
+                    raise ValueError(f"Column {i} not found in template file {input_data}")
+            return data
 
     def get_data(self):
         """Read data from tsv file and store in object data attribute."""
 
         self.isoplot_logger.info(f'Reading datafile {self.datapath} \n')
-
-        self.data = IsoplotData.read_data(self.datapath)
-
+        try:
+            self.data = IsoplotData.load_isocor_data(self.datapath)
+        except Exception:
+            self.isoplot_logger.exception("Error while reading isocor data")
         self.isoplot_logger.info("Data is loaded")
 
     def generate_template(self):
@@ -84,20 +140,9 @@ class IsoplotData:
 
         try:
             self.isoplot_logger.debug('Trying to read template')
-            self.template = IsoplotData.read_data(path)
-
-        except TypeError:
-            self.template = pd.read_excel(path, engine='openpyxl')
-
-        except UnicodeDecodeError as uni:
-            self.isoplot_logger.error(uni)
-            self.isoplot_logger.error(
-                'Unable to read file. Check file encoding (must be utf-8) or file format (format must be .xlsx)')
-
-        except Exception as err:
-            self.isoplot_logger.error("There has been a problem...")
-            self.isoplot_logger.error(err)
-
+            self.template = IsoplotData.load_template(path)
+        except Exception:
+            self.isoplot_logger.exception("Error while loading data")
         else:
             self.isoplot_logger.info("Template succesfully loaded")
 
@@ -148,5 +193,10 @@ class IsoplotData:
         self.dfmerge.sort_values(['condition_order', 'condition'], inplace=True)
         self.dfmerge.fillna(0, inplace=True)
         if export:
-            self.dfmerge.to_csv(r'Data_Export.csv', index=False)
-        self.isoplot_logger.info('Data exported. Check Data_Export.csv')
+            self.dfmerge.to_csv(r"./Data_Export", sep=';', index=False)
+            self.isoplot_logger.info('Data exported. Check Data_Export.csv')
+        else:
+            output = io.StringIO()
+            self.dfmerge.to_csv(output, sep=';', index=False)
+            output.seek(0)
+            print(output.read())

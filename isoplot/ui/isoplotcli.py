@@ -153,8 +153,6 @@ class IsoplotCli:
 
         :param figures: storage of figures and their respective file names in tuples: (name, fig)
         :type figures: list of tuples
-        :param export_path: path to export location
-        :type export_path: str
         :param name: name of the exported zip file
         :type name: str
         """
@@ -184,6 +182,8 @@ class IsoplotCli:
         :type metabolite_list: list of str
         :param data_object: object containing the prepared data
         :type data_object: class: 'isoplot.main.dataprep.IsoplotData'
+        :param rtrn: should figures be returned and exported in zip
+        :type rtrn: bool
         """
 
         if rtrn:
