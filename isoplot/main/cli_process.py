@@ -9,7 +9,7 @@ import sys
 from isoplot.main.dataprep import IsoplotData
 from isoplot.ui.isoplotcli import IsoplotCli
 from isoplot.ui.isoplot_notebook import check_version
-
+import isoplot.logger
 
 # noinspection PyBroadException
 def main():
@@ -20,33 +20,34 @@ def main():
     if not cli.args.galaxy:
         # Initialize path to root directory (directory containing data file)
         cli.home = Path(cli.args.input_path).parents[0]
-    # Get time and date for the run directory name
-    now = datetime.datetime.now()
-    date_time = now.strftime("%d%m%Y_%Hh%Mmn")
-    if not cli.args.galaxy:
+        os.chdir(cli.home)
+        # Get time and date for the run directory name
+        now = datetime.datetime.now()
+        date_time = now.strftime("%d%m%Y_%Hh%Mmn")
         # Initialize run name and run directory
         run_name = cli.args.run_name + "_" + date_time
         cli.run_home = cli.home / run_name
         cli.run_home.mkdir()
     # Prepare logger
-    logger = logging.getLogger("Isoplot.isoplotcli")
-    handle = logging.StreamHandler()
+    logger = logging.getLogger("isoplot_log.main.cli_process")
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # If not in galaxy instance, then we create file handler for the logger (Galaxy redirects stderr to file already)
     if not cli.args.galaxy:
         fhandle = logging.FileHandler(cli.run_home / "run_info.txt")  # Log run info to txt file
-    else:
-        fhandle = logging.FileHandler("run_info.txt")
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fhandle.setFormatter(formatter)
+        logger.addHandler(fhandle)
+        if cli.args.verbose:
+            fhandle.setLevel(logging.DEBUG)
+        else:
+            fhandle.setLevel(logging.INFO)
+    handle = logging.StreamHandler()
     handle.setFormatter(formatter)
-    fhandle.setFormatter(formatter)
     logger.addHandler(handle)
-    logger.addHandler(fhandle)
-    logger.setLevel(logging.DEBUG)
     if cli.args.verbose:
         handle.setLevel(logging.DEBUG)
-        fhandle.setLevel(logging.DEBUG)
     else:
         handle.setLevel(logging.INFO)
-        fhandle.setLevel(logging.INFO)
+    # Start work
     logger.debug("Generate Data Object")
     try:
         data = IsoplotData(cli.args.input_path, cli.args.verbose)
@@ -72,7 +73,10 @@ def main():
             logger.debug("Merging data")
             data.merge_data()
             logger.debug("Preparing data")
-            data.prepare_data(export=False)  # Data export is sent through StringIO to stream
+            if cli.args.galaxy:
+                data.prepare_data(export=False)  # Data export is sent through StringIO to stream
+            else:
+                data.prepare_data(export=True)
         except Exception:
             logger.exception("There was a problem while loading the template")
             sys.exit()
@@ -93,17 +97,20 @@ def main():
     logger.info(f"Chosen metabolites: {cli.metabolites}")
     logger.info(f"Chosen conditions: {cli.conditions}")
     logger.info(f"Chosen times: {cli.times}")
+    logger.info(f"Zip: {cli.args.zip}")
     logger.info("-------------------------------")
     logger.info("Creating plots...")
     try:
-        cli.plot_figs(cli.metabolites, data, cli.args.zip)
+        if hasattr(cli.args, 'zip'):
+            cli.plot_figs(cli.metabolites, data, zip=True)
+        else:
+            cli.plot_figs(cli.metabolites, data)
     except Exception:
         logger.exception("There was a problem during the creation of the plots")
     else:
         logger.info("Plots created. Run is terminated")
         if not cli.args.galaxy:
             sys.exit()
-
 
 if __name__ == "__main__":
     main()

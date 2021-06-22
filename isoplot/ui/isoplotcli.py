@@ -1,6 +1,6 @@
 """Module containing the CLI class that will be used during the cli process to get arguments from user and
 generate the desired plots"""
-
+import logging
 import os
 import argparse
 import zipfile
@@ -10,24 +10,28 @@ from bokeh.resources import CDN
 from bokeh.embed import file_html
 
 from isoplot.main.plots import StaticPlot, InteractivePlot, Map
+import isoplot.logger
 
+mod_logger = logging.getLogger("isoplot_log.ui.isoplotcli")
 
 class IsoplotCli:
 
-    def __init__(self):
+    def __init__(self, home=None, run_home=None, static_plot=None, int_plot=None, map=None, args=None):
 
         self.parser = argparse.ArgumentParser("Isoplot2: Plotting isotopic labelling MS data")
 
-        self.home = None
-        self.run_home = None
-        self.static_plot = None
-        self.int_plot = None
-        self.map = None
-        self.args = None
+        self.home = home
+        self.run_home = run_home
+        self.static_plot = static_plot
+        self.int_plot = int_plot
+        self.map = map
+        self.args = args
 
         self.metabolites = []
         self.conditions = []
         self.times = []
+
+        self.logger = logging.getLogger("isoplot_log.ui.isoplotcli.IsoplotCli")
 
     def dir_init(self, plot_type):
         """Initialize directory for plot"""
@@ -97,8 +101,8 @@ class IsoplotCli:
                                  help='Turns logger to debug mode')
         self.parser.add_argument('-a', '--annot', action='store_true',
                                  help='Add option if annotations should be added on maps')
-        self.parser.add_argument('-z', '--zip', action="store_true",
-                                 help="Add option to export plots in zip file")
+        self.parser.add_argument('-z', '--zip', type=str,
+                                 help="Add option & path to export plots in zip file")
 
         self.parser.add_argument('-g', '--galaxy', action='store_true',
                                  help='Option for galaxy integration. Not useful for local usage')
@@ -145,20 +149,18 @@ class IsoplotCli:
                     is_error = False
         return desire
 
-    @staticmethod
-    def zip_export(figures, name):
+    def zip_export(self, figures, zip_file_name):
         """
         Function to save figures in figure list to zip file (taken from
         https://stackoverflow.com/questions/55616877/save-multiple-objects-to-zip-directly-from-memory-in-python)
 
         :param figures: storage of figures and their respective file names in tuples: (name, fig)
         :type figures: list of tuples
-        :param name: name of the exported zip file
-        :type name: str
+        :param zip_file_name: name of the exported zip file
+        :type zip_file_name: str
         """
 
-        zip_file_name = f"{name}.zip"
-        print(f"Creating archive: {zip_file_name}")
+        self.logger.info(f"Creating archive: {zip_file_name}")
         with zipfile.ZipFile(zip_file_name, mode="w") as zf:
             for fig_name, fig in figures:
                 if fig_name.endswith("svg"):
@@ -170,10 +172,10 @@ class IsoplotCli:
                 else:
                     buf = io.BytesIO()
                     fig.savefig(buf)
-                print(f"Writing image {fig_name} in the archive")
+                self.logger.info(f"Writing image {fig_name} in the archive")
                 zf.writestr(fig_name, buf.getvalue())
 
-    def plot_figs(self, metabolite_list, data_object, rtrn):
+    def plot_figs(self, metabolite_list, data_object, zip=False):
         """
         Function to control which plot methods are called depending on the
         arguments that were parsed
@@ -182,27 +184,27 @@ class IsoplotCli:
         :type metabolite_list: list of str
         :param data_object: object containing the prepared data
         :type data_object: class: 'isoplot.main.dataprep.IsoplotData'
-        :param rtrn: should figures be returned and exported in zip
-        :type rtrn: bool
+        :param zip: should figures be returned and exported in zip
+        :type zip: bool
         """
 
-        if rtrn:
+        if zip:
             figures = []
 
         for metabolite in metabolite_list:
             for value in self.args.value:
                 self.static_plot = StaticPlot(self.args.stack, value, data_object.dfmerge,
                                               self.args.run_name, metabolite, self.conditions, self.times,
-                                              self.args.format, display=False, rtrn=rtrn)
+                                              self.args.format, display=False, rtrn=zip)
 
                 self.int_plot = InteractivePlot(self.args.stack, value, data_object.dfmerge,
                                                 self.args.run_name, metabolite, self.conditions, self.times,
-                                                display=False, rtrn=rtrn)
+                                                display=False, rtrn=zip)
 
                 # STATIC PLOTS
                 if self.args.stacked_areaplot:
                     plot_name = "Static_Areaplots"
-                    if rtrn:
+                    if zip:
                         fig = self.static_plot.stacked_areaplot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
@@ -212,7 +214,7 @@ class IsoplotCli:
 
                 if self.args.barplot and not (value == "mean_enrichment"):
                     plot_name = "Static_barplots"
-                    if rtrn:
+                    if zip:
                         fig = self.static_plot.barplot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
@@ -222,7 +224,7 @@ class IsoplotCli:
 
                 if self.args.meaned_barplot and not (value == "mean_enrichment"):
                     plot_name = "Static_barplots_SD"
-                    if rtrn:
+                    if zip:
                         fig = self.static_plot.mean_barplot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
@@ -232,7 +234,7 @@ class IsoplotCli:
 
                 if self.args.barplot and (value == "mean_enrichment"):
                     plot_name = "Static_barplots"
-                    if rtrn:
+                    if zip:
                         fig = self.static_plot.mean_enrichment_plot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
@@ -242,7 +244,7 @@ class IsoplotCli:
 
                 if self.args.meaned_barplot and (value == "mean_enrichment"):
                     plot_name = "Static_barplots_SD"
-                    if rtrn:
+                    if zip:
                         fig = self.static_plot.mean_enrichment_meanplot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
@@ -253,7 +255,7 @@ class IsoplotCli:
                 # INTERACTIVE PLOTS
                 if self.args.interactive_barplot and not (value == "mean_enrichment"):
                     plot_name = "Interactive_barplots"
-                    if rtrn:
+                    if zip:
                         fig = self.int_plot.stacked_barplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
@@ -263,7 +265,7 @@ class IsoplotCli:
 
                 if self.args.interactive_barplot and not self.args.stack:
                     plot_name = "Interactive_unstacked_barplots"
-                    if rtrn:
+                    if zip:
                         fig = self.int_plot.unstacked_barplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
@@ -273,7 +275,7 @@ class IsoplotCli:
 
                 if self.args.interactive_meanplot and not (value == "mean_enrichment"):
                     plot_name = "Interactive_barplots_SD"
-                    if rtrn:
+                    if zip:
                         fig = self.int_plot.stacked_meanplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
@@ -283,7 +285,7 @@ class IsoplotCli:
 
                 if self.args.interactive_meanplot and not self.args.stack:
                     plot_name = "Interactive_barplots_SD"
-                    if rtrn:
+                    if zip:
                         fig = self.int_plot.unstacked_meanplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
@@ -293,7 +295,7 @@ class IsoplotCli:
 
                 if self.args.interactive_barplot and (value == "mean_enrichment"):
                     plot_name = "Interactive_barplots"
-                    if rtrn:
+                    if zip:
                         fig = self.int_plot.mean_enrichment_plot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
@@ -303,7 +305,7 @@ class IsoplotCli:
 
                 if self.args.interactive_meanplot and (value == "mean_enrichment"):
                     plot_name = "Interactive_barplots_SD"
-                    if rtrn:
+                    if zip:
                         fig = self.int_plot.mean_enrichment_meanplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
@@ -313,7 +315,7 @@ class IsoplotCli:
 
                 if self.args.interactive_areaplot:
                     plot_name = "Interactive_stackplots"
-                    if rtrn:
+                    if zip:
                         fig = self.int_plot.stacked_areaplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
@@ -322,11 +324,11 @@ class IsoplotCli:
                         self.int_plot.stacked_areaplot()
 
         # MAPS
-        self.map = Map(data_object.dfmerge, self.args.run_name, self.args.annot, self.args.format, rtrn=rtrn)
+        self.map = Map(data_object.dfmerge, self.args.run_name, self.args.annot, self.args.format, rtrn=zip)
 
         if self.args.static_heatmap:
             plot_name = "static_heatmap"
-            if rtrn:
+            if zip:
                 fig = self.map.build_heatmap()
                 fname = plot_name + f".{self.map.fmt}"
                 figures.append((fname, fig))
@@ -336,7 +338,7 @@ class IsoplotCli:
 
         if self.args.static_clustermap:
             plot_name = "static_clustermap"
-            if rtrn:
+            if zip:
                 fig = self.map.build_clustermap()
                 fname = plot_name + f".{self.map.fmt}"
                 figures.append((fname, fig))
@@ -347,7 +349,7 @@ class IsoplotCli:
         if self.args.interactive_heatmap:
             self.map.fmt = "html"
             plot_name = "interactive_heatmap"
-            if rtrn:
+            if zip:
                 fig = self.map.build_interactive_heatmap()
                 fname = plot_name + f".{self.map.fmt}"
                 figures.append((fname, fig))
@@ -355,8 +357,8 @@ class IsoplotCli:
                 self.dir_init(plot_name)
                 self.map.build_interactive_heatmap()
 
-        if rtrn:
-            IsoplotCli.zip_export(figures, self.args.run_name)
+        if zip:
+            self.zip_export(figures, self.args.zip)
         if not self.args.galaxy:
             self.go_home()
 
@@ -365,6 +367,14 @@ class IsoplotCli:
 
         self.parse_Args()
         self.args = self.parser.parse_args()
+        handle = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handle.setFormatter(formatter)
+        if self.args.verbose:
+            handle.setLevel(logging.DEBUG)
+        else:
+            handle.setLevel(logging.INFO)
+        self.logger.addHandler(handle)
 
         # Check for typos and input errors
         valid_formats = ['png', 'svg', 'pdf', 'jpeg', 'html']
