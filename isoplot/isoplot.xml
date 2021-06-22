@@ -3,7 +3,7 @@
         <requirement type='package' version='1.2.4'>isoplot</requirement>
     </requirements>
     <command><![CDATA[
-         isoplot '$datafile' 'galaxy' '$format' --value '$value' --template '$template_file' -z -g
+         isoplot '$datafile' 'galaxy' '$format' --value '$value' --template '$template_file'
 #if $SP.generate_barplot:
     -bp
 #end if
@@ -40,7 +40,7 @@
 #if $annotation:
     -a
 #end if
->'$output2' > $output1 2> '$output3'
+-g -z '$output2' > $output1 2> '$output3'
     ]]></command>
     <inputs>
         <param name='datafile' type='data' format='csv' label='Upload data file' />
@@ -116,6 +116,9 @@ Isoplot2: Plotting isotopic labelling MS data
   -t TIME, --time TIME
                         Time(s) to plot. For all, type in 'all'
 
+  -gt, --generate_template
+                        Generate the template using datafile metadata
+
   -tp TEMPLATE_PATH, --template_path TEMPLATE_PATH
                         Path to template file
 
@@ -161,7 +164,7 @@ Isoplot2: Plotting isotopic labelling MS data
       title = {isoplot},
       publisher = {GitHub},
       journal = {GitHub repository},
-      url = {https://github.com/llegregam/isoplot},
+      url = {https://github.com/llegregam},
     }</citation>
         </citations>
     </tool>
