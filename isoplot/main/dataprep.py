@@ -9,7 +9,7 @@ from natsort import natsorted
 class IsoplotData:
     """
     Class to prepare Isoplot Data for plotting
-    
+
     :param datapath: Path to .csv file containing Isocor output data
     :type datapath: str
     """
