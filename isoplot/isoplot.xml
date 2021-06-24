@@ -10,9 +10,6 @@
 #if $SP.generate_meanplot:
     -mb
 #end if
-#if $SP.generate_areaplot:
-    -sa
-#end if
 #if $SP.generate_heatmap:
     -hm
 #end if
@@ -21,12 +18,9 @@
 #end if
 #if $IP.generate_barplot:
     -IB
-#end if
+#end i
 #if $IP.generate_meanplot:
     -IM
-#end if
-#if $IP.generate_areaplot:
-    -IS
 #end if
 #if $IP.generate_heatmap:
     -HM
@@ -63,8 +57,8 @@
                    optional='true'/>
             <param type='boolean' name='generate_meanplot' label='Flag to generate meaned barplots' argument='-mb'
                    optional='true'/>
-            <param type='boolean' name='generate_areaplot' label='Flag to generate stacked area plots'
-                   argument='-sa' optional='true'/>
+            <!--<param type='boolean' name='generate_areaplot' label='Flag to generate stacked area plots'
+                   argument='-sa' optional='true'/>/-->
             <param type='boolean' name='generate_heatmap' label='Flag to generate heatmap' argument='-hm'
                    optional='true'/>
             <param type='boolean' name='generate_clustermap' label='Flag to generate clustermap' argument='-cm'
@@ -75,8 +69,8 @@
                    optional='true'/>
             <param type='boolean' name='generate_meanplot' label='Flag to generate meaned barplots' argument='-IM'
                    optional='true'/>
-            <param type='boolean' name='generate_areaplot' label='Flag to generate stacked area plots' argument='-IS'
-                   optional='true'/>
+           <!-- <param type='boolean' name='generate_areaplot' label='Flag to generate stacked area plots' argument='-IS'
+                   optional='true'/>-->
             <param type='boolean' name='generate_heatmap' label='Flag to generate heatmap' argument='-HM'
                    optional='true'/>
         </section>
@@ -97,68 +91,38 @@ Isoplot2: Plotting isotopic labelling MS data
 
 **Positional arguments:**
 
-  input_path            Path to datafile
+  input_path		Path to datafile
   run_name              Name of the current run
   format                Format of generated file
 
 **optional arguments:**
   -h, --help            show this help message and exit
+  --value		Choices: "corrected_area", "isotopologue_fraction", "mean_enrichment". Select values to plot. This option can be given multiple times
 
-  --value [corrected_area,isotopologue_fraction,mean_enrichment]
-                        Select values to plot. This option can be given multiple times
+  -m METABOLITE		Metabolite(s) to plot. For all, type in 'all'
+  -c CONDITION		Condition(s) to plot. For all, type in 'all'
+  -t TIME		Time(s) to plot. For all, type in 'all'
+  -tp TEMPLATE_PATH		Path to template file
 
-  -m METABOLITE, --metabolite METABOLITE
-                        Metabolite(s) to plot. For all, type in 'all'
+  -sa, --stacked_areaplot		Create static stacked areaplot
+  -bp, --barplot		Create static barplot
+  -mb, --meaned_barplot		Create static barplot with meaned replicates
 
-  -c CONDITION, --condition CONDITION
-                        Condition(s) to plot. For all, type in 'all'
-
-  -t TIME, --time TIME
-                        Time(s) to plot. For all, type in 'all'
-
-  -gt, --generate_template
-                        Generate the template using datafile metadata
-
-  -tp TEMPLATE_PATH, --template_path TEMPLATE_PATH
-                        Path to template file
-
-  -sa, --stacked_areaplot
-                        Create static stacked areaplot
-
-  -bp, --barplot
-                        Create static barplot
-
-  -mb, --meaned_barplot
-                        Create static barplot with meaned replicates
-
-  -IB, --interactive_barplot
-                        Create interactive stacked barplot
-
-  -IM, --interactive_stacked_meanplot
-                        Create interactive stacked barplot with meaned replicates
-
-  -IS, --interactive_areaplot
-                        Create interactive stacked areaplot
-
-  -hm, --static_heatmap
-                        Create a static heatmap using mean enrichment data
-
-  -cm, --static_clustermap
-                        Create a static heatmap with clustering using mean enrichment data
-
-  -HM, --interactive_heatmap
-                        Create interactive heatmap using mean enrichment data
+  -IB, --interactive_barplot		Create interactive stacked barplot
+  -IM, --interactive_stacked_meanplot		Create interactive stacked barplot with meaned replicates
+  -IS, --interactive_areaplot		Create interactive stacked areaplot
+  -hm, --static_heatmap		Create a static heatmap using mean enrichment data
+  -cm, --static_clustermap		Create a static heatmap with clustering using mean enrichment data
+  -HM, --interactive_heatmap		Create interactive heatmap using mean enrichment data
 
   -s, --stack           Add option if barplots should be unstacked
-
   -v, --verbose         Turns logger to debug mode
-
   -a, --annot           Add option if annotations should be added on maps
 
     ]]></help>
     <citations>
         <citation type='bibtex'>
-    @misc{githubseqtk,
+    @misc{githubisoplot,
       author = {Le Gregam, Loic},
       year = {2021},
       title = {isoplot},
