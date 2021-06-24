@@ -89,7 +89,7 @@ class IsoplotData:
                 raise ValueError("No data file selected")
             try:
                 data = pd.read_excel(datapath, engine='openpyxl', sheet_name=excel_sheet)
-            except ValueError:
+            except Exception:
                 try:
                     with open(str(datapath), 'r', encoding='utf-8') as dp:
                         data = pd.read_csv(dp, sep=";")
