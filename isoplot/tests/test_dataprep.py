@@ -9,17 +9,15 @@ from isoplot.main.dataprep import IsoplotData
 
 @pytest.fixture(scope='function', autouse=True)
 def df():
-    df = IsoplotData(r".\test_data\160419_T_Daubon_MC_principale_res.csv")
-    return df
+    return IsoplotData(r".\test_data\160419_T_Daubon_MC_principale_res.csv")
 
 @pytest.fixture(scope='function', autouse=True)
 def columns():
-    columns = ["sample", "metabolite", "area", "corrected_area", "isotopologue_fraction", "mean_enrichment"]
-    return columns
+    return ["sample", "metabolite", "area", "corrected_area", "isotopologue_fraction", "mean_enrichment"]
 
 @pytest.fixture(scope='function', autouse=True)
 def sample_names():
-    sample_names = ['110419_T0_Cont_1_2',
+    return ['110419_T0_Cont_1_2',
                     '110419_T0_Cont_2_8',
                     '110419_T0_Cont_3_9',
                     '110419_T24_Cont_1_27',
@@ -55,8 +53,6 @@ def sample_names():
                     '110419_T48_AB_1_59',
                     '110419_T48_AB_2_60',
                     '110419_T48_AB_3_61']
-
-    return sample_names
 
 
 class Test_dataprep:
