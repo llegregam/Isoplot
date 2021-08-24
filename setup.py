@@ -46,7 +46,8 @@ setup(
                 "autodoc",
                 "sphinx_rtd_theme",
                 "sdist",
-                "twine"
+                "twine",
+                "pytest"
                 ]
     },
 	entry_points = {
