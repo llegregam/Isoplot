@@ -97,12 +97,13 @@ def main():
     logger.info(f"Chosen metabolites: {cli.metabolites}")
     logger.info(f"Chosen conditions: {cli.conditions}")
     logger.info(f"Chosen times: {cli.times}")
-    logger.info(f"Zip: {cli.args.zip}")
+    if hasattr(cli.args, 'z'):
+        logger.info(f"Zip: {cli.args.zip}")
     logger.info("-------------------------------")
     logger.info("Creating plots...")
     try:
-        if hasattr(cli.args, 'zip'):
-            cli.plot_figs(cli.metabolites, data, zip=True)
+        if hasattr(cli.args, 'z'):
+            cli.plot_figs(cli.metabolites, data, build_zip=True)
         else:
             cli.plot_figs(cli.metabolites, data)
     except Exception:

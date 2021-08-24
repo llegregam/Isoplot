@@ -62,29 +62,29 @@ class IsoplotData:
         return data
 
     @staticmethod
-    def load_template(input_data, excel_sheet=0):
+    def load_template(input, excel_sheet=0):
         """Function to read incoming template data"""
 
         # Since the template can be in excel format, when input comes from upload button in the notebook it is a
         # bytes file. So we check and handle this here
-        if isinstance(input_data, bytes):
+        if isinstance(input, bytes):
             toread = io.BytesIO()
-            toread.write(input_data)
+            toread.write(input)
             toread.seek(0)
             try:
-                data = pd.read_excel(input_data, engine='openpyxl', sheet_name=excel_sheet)
+                data = pd.read_excel(input, engine='openpyxl', sheet_name=excel_sheet)
             except ValueError:
-                data = pd.read_csv(input_data, sep=";")
+                data = pd.read_csv(input, sep=";")
                 if len(data.columns) == 1:
                     del data
-                    data = pd.read_csv(input_data, sep="\t")
+                    data = pd.read_csv(input, sep="\t")
                 return data
             except Exception as ex:
                 raise ValueError(f"There was a problem while processing the input template. Traceback: {ex}")
             else:
                 return data
         else:
-            datapath = pl.Path(input_data)
+            datapath = pl.Path(input).resolve()
             if not datapath.is_file():
                 raise ValueError("No data file selected")
             try:
@@ -98,12 +98,12 @@ class IsoplotData:
                             data = pd.read_csv(dp, sep="\t")
                 except Exception as err:
                     raise ValueError(
-                        f"Error during the lecture of the template file {input_data}. "
+                        f"Error during the lecture of the template file {input}. "
                         f"Please check file content and format. Traceback: {err}")
             to_check = ['sample', 'condition', 'condition_order', 'time', 'number_rep', 'normalization']
             for i in to_check:
                 if i not in data.columns:
-                    raise ValueError(f"Column {i} not found in template file {input_data}")
+                    raise ValueError(f"Column {i} not found in template file {input}")
             return data
 
     def get_data(self):

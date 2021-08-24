@@ -4,7 +4,7 @@ Reference
 :file:`dataprep.py`
 -----------------------
 
-.. automodule:: isoplot.dataprep
+.. automodule:: isoplot.main.dataprep
    :members:
    :undoc-members:
    :show-inheritance:
@@ -12,7 +12,7 @@ Reference
 :file:`plots.py`
 -----------------------
 
-.. automodule:: isoplot.plots
+.. automodule:: isoplot.main.plots
    :members:
    :undoc-members:
    :show-inheritance: True
@@ -20,7 +20,7 @@ Reference
 :file:`isoplotcli.py`
 -----------------------
 
-.. automodule:: isoplot.isoplotcli
+.. automodule:: isoplot.ui.isoplotcli
    :members:
    :undoc-members:
    :show-inheritance:
@@ -28,7 +28,7 @@ Reference
 :file:`cli_process.py`
 -----------------------
 
-.. automodule:: isoplot.cli_process
+.. automodule:: isoplot.main.cli_process
    :members:
    :undoc-members:
    :show-inheritance:
@@ -36,7 +36,7 @@ Reference
 :file:`isoplot_notebook.py`
 ---------------------------
 
-.. automodule:: isoplot.isoplot_notebook
+.. automodule:: isoplot.ui.isoplot_notebook
    :members:
    :undoc-members: True
    :show-inheritance:

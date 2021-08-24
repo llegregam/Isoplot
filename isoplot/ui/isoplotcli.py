@@ -14,23 +14,79 @@ import isoplot.logger
 
 mod_logger = logging.getLogger("isoplot_log.ui.isoplotcli")
 
+
+def parse_args():
+    """
+    Parse arguments from user input.
+
+    :return: Argument Parser object
+    :rtype: class: argparse.ArgumentParser
+    """
+
+    parser = argparse.ArgumentParser("Isoplot2: Plotting isotopic labelling MS data")
+
+    parser.add_argument('input_path', help="Path to datafile")
+    parser.add_argument("run_name", help="Name of the current run")
+    parser.add_argument("format", help="Format of generated file")
+    values = ['corrected_area', 'isotopologue_fraction', 'mean_enrichment']
+    parser.add_argument('--value', choices=values, default='isotopologue_fraction',
+                        action="store", required=True, nargs='*',
+                        help="Select values to plot. This option can be given multiple times")
+    parser.add_argument('-m', '--metabolite', default='all',
+                        help="Metabolite(s) to plot. For all, type in 'all' ")
+    parser.add_argument('-c', '--condition', default='all',
+                        help="Condition(s) to plot. For all, type in 'all' ")
+    parser.add_argument('-t', '--time', default='all',
+                        help="Time(s) to plot. For all, type in 'all' ")
+    parser.add_argument("-gt", "--generate_template", action="store_true",
+                        help="Generate the template using datafile metadata")
+    parser.add_argument("-tp", "--template_path", type=str,
+                        help="Path to template file")
+    parser.add_argument('-sa', '--stacked_areaplot', action="store_true",
+                        help='Create static stacked areaplot')
+    parser.add_argument("-bp", "--barplot", action="store_true",
+                        help='Create static barplot')
+    parser.add_argument('-mb', '--meaned_barplot', action="store_true",
+                        help='Create static barplot with meaned replicates')
+    parser.add_argument('-IB', '--interactive_barplot', action="store_true",
+                        help='Create interactive stacked barplot')
+    parser.add_argument('-IM', '--interactive_meanplot', action="store_true",
+                        help='Create interactive stacked barplot with meaned replicates')
+    parser.add_argument('-IS', '--interactive_areaplot', action="store_true",
+                        help='Create interactive stacked areaplot')
+    parser.add_argument('-hm', '--static_heatmap', action="store_true",
+                        help='Create a static heatmap using mean enrichment data')
+    parser.add_argument('-cm', '--static_clustermap', action="store_true",
+                        help='Create a static heatmap with clustering using mean enrichment data')
+    parser.add_argument('-HM', '--interactive_heatmap', action="store_true",
+                        help='Create interactive heatmap using mean enrichment data')
+    parser.add_argument('-s', '--stack', action="store_false",
+                        help='Add option if barplots should be unstacked')
+    parser.add_argument('-v', '--verbose', action="store_true",
+                        help='Turns logger to debug mode')
+    parser.add_argument('-a', '--annot', action='store_true',
+                        help='Add option if annotations should be added on maps')
+    parser.add_argument('-z', '--zip', type=str,
+                        help="Add option & path to export plots in zip file")
+    parser.add_argument('-g', '--galaxy', action='store_true',
+                        help='Option for galaxy integration. Not useful for local usage')
+    return parser
+
+
 class IsoplotCli:
 
-    def __init__(self, home=None, run_home=None, static_plot=None, int_plot=None, map=None, args=None):
+    def __init__(self, home=None, run_home=None, static_plot=None, int_plot=None, maps=None, args=None):
 
-        self.parser = argparse.ArgumentParser("Isoplot2: Plotting isotopic labelling MS data")
-
+        self.parser = parse_args()
         self.home = home
         self.run_home = run_home
         self.static_plot = static_plot
         self.int_plot = int_plot
-        self.map = map
+        self.map = maps
         self.args = args
-
         self.metabolites = []
         self.conditions = []
         self.times = []
-
         self.logger = logging.getLogger("isoplot_log.ui.isoplotcli.IsoplotCli")
 
     def dir_init(self, plot_type):
@@ -46,66 +102,67 @@ class IsoplotCli:
         """Exit after work is done"""
         os.chdir(self.home)
 
-    def parse_Args(self):
-        """
-        Parse arguments from user
-
-        :return: Argument Parser object
-        :rtype: class: argparse.ArgumentParser
-        """
-
-        self.parser.add_argument('input_path', help="Path to datafile")
-        self.parser.add_argument("run_name", help="Name of the current run")
-        self.parser.add_argument("format", help="Format of generated file")
-
-        values = ['corrected_area', 'isotopologue_fraction', 'mean_enrichment']
-        self.parser.add_argument('--value', choices=values, default='isotopologue_fraction',
-                                 action="store", required=True, nargs='*',
-                                 help="Select values to plot. This option can be given multiple times")
-
-        self.parser.add_argument('-m', '--metabolite', default='all',
-                                 help="Metabolite(s) to plot. For all, type in 'all' ")
-        self.parser.add_argument('-c', '--condition', default='all',
-                                 help="Condition(s) to plot. For all, type in 'all' ")
-        self.parser.add_argument('-t', '--time', default='all',
-                                 help="Time(s) to plot. For all, type in 'all' ")
-        self.parser.add_argument("-gt", "--generate_template", action="store_true",
-                                 help="Generate the template using datafile metadata")
-        self.parser.add_argument("-tp", "--template_path", type=str,
-                                 help="Path to template file")
-
-        self.parser.add_argument('-sa', '--stacked_areaplot', action="store_true",
-                                 help='Create static stacked areaplot')
-        self.parser.add_argument("-bp", "--barplot", action="store_true",
-                                 help='Create static barplot')
-        self.parser.add_argument('-mb', '--meaned_barplot', action="store_true",
-                                 help='Create static barplot with meaned replicates')
-
-        self.parser.add_argument('-IB', '--interactive_barplot', action="store_true",
-                                 help='Create interactive stacked barplot')
-        self.parser.add_argument('-IM', '--interactive_meanplot', action="store_true",
-                                 help='Create interactive stacked barplot with meaned replicates')
-        self.parser.add_argument('-IS', '--interactive_areaplot', action="store_true",
-                                 help='Create interactive stacked areaplot')
-
-        self.parser.add_argument('-hm', '--static_heatmap', action="store_true",
-                                 help='Create a static heatmap using mean enrichment data')
-        self.parser.add_argument('-cm', '--static_clustermap', action="store_true",
-                                 help='Create a static heatmap with clustering using mean enrichment data')
-        self.parser.add_argument('-HM', '--interactive_heatmap', action="store_true",
-                                 help='Create interactive heatmap using mean enrichment data')
-
-        self.parser.add_argument('-s', '--stack', action="store_false",
-                                 help='Add option if barplots should be unstacked')
-        self.parser.add_argument('-v', '--verbose', action="store_true",
-                                 help='Turns logger to debug mode')
-        self.parser.add_argument('-a', '--annot', action='store_true',
-                                 help='Add option if annotations should be added on maps')
-        self.parser.add_argument('-z', '--zip', type=str,
-                                 help="Add option & path to export plots in zip file")
-
-        self.parser.add_argument('-g', '--galaxy', action='store_true',
-                                 help='Option for galaxy integration. Not useful for local usage')
+    # def add_Args(self):
+    #     """
+    #     Parse arguments from user
+    #
+    #     :return: Argument Parser object
+    #     :rtype: class: argparse.ArgumentParser
+    #     """
+    #     pass
+        # parse_Args(self.parser)
+        # self.parser.add_argument('input_path', help="Path to datafile")
+        # self.parser.add_argument("run_name", help="Name of the current run")
+        # self.parser.add_argument("format", help="Format of generated file")
+        #
+        # values = ['corrected_area', 'isotopologue_fraction', 'mean_enrichment']
+        # self.parser.add_argument('--value', choices=values, default='isotopologue_fraction',
+        #                          action="store", required=True, nargs='*',
+        #                          help="Select values to plot. This option can be given multiple times")
+        #
+        # self.parser.add_argument('-m', '--metabolite', default='all',
+        #                          help="Metabolite(s) to plot. For all, type in 'all' ")
+        # self.parser.add_argument('-c', '--condition', default='all',
+        #                          help="Condition(s) to plot. For all, type in 'all' ")
+        # self.parser.add_argument('-t', '--time', default='all',
+        #                          help="Time(s) to plot. For all, type in 'all' ")
+        # self.parser.add_argument("-gt", "--generate_template", action="store_true",
+        #                          help="Generate the template using datafile metadata")
+        # self.parser.add_argument("-tp", "--template_path", type=str,
+        #                          help="Path to template file")
+        #
+        # self.parser.add_argument('-sa', '--stacked_areaplot', action="store_true",
+        #                          help='Create static stacked areaplot')
+        # self.parser.add_argument("-bp", "--barplot", action="store_true",
+        #                          help='Create static barplot')
+        # self.parser.add_argument('-mb', '--meaned_barplot', action="store_true",
+        #                          help='Create static barplot with meaned replicates')
+        #
+        # self.parser.add_argument('-IB', '--interactive_barplot', action="store_true",
+        #                          help='Create interactive stacked barplot')
+        # self.parser.add_argument('-IM', '--interactive_meanplot', action="store_true",
+        #                          help='Create interactive stacked barplot with meaned replicates')
+        # self.parser.add_argument('-IS', '--interactive_areaplot', action="store_true",
+        #                          help='Create interactive stacked areaplot')
+        #
+        # self.parser.add_argument('-hm', '--static_heatmap', action="store_true",
+        #                          help='Create a static heatmap using mean enrichment data')
+        # self.parser.add_argument('-cm', '--static_clustermap', action="store_true",
+        #                          help='Create a static heatmap with clustering using mean enrichment data')
+        # self.parser.add_argument('-HM', '--interactive_heatmap', action="store_true",
+        #                          help='Create interactive heatmap using mean enrichment data')
+        #
+        # self.parser.add_argument('-s', '--stack', action="store_false",
+        #                          help='Add option if barplots should be unstacked')
+        # self.parser.add_argument('-v', '--verbose', action="store_true",
+        #                          help='Turns logger to debug mode')
+        # self.parser.add_argument('-a', '--annot', action='store_true',
+        #                          help='Add option if annotations should be added on maps')
+        # self.parser.add_argument('-z', '--zip', type=str,
+        #                          help="Add option & path to export plots in zip file")
+        #
+        # self.parser.add_argument('-g', '--galaxy', action='store_true',
+        #                          help='Option for galaxy integration. Not useful for local usage')
 
     @staticmethod
     def get_cli_input(arg, param, data_object):
@@ -129,7 +186,6 @@ class IsoplotCli:
             desire = data_object.dfmerge[param].unique()
         else:
             is_error = True
-
             while is_error:
                 try:
                     # Cli gives list of strings, se we must make words of them
@@ -175,7 +231,7 @@ class IsoplotCli:
                 self.logger.info(f"Writing image {fig_name} in the archive")
                 zf.writestr(fig_name, buf.getvalue())
 
-    def plot_figs(self, metabolite_list, data_object, zip=False):
+    def plot_figs(self, metabolite_list, data_object, build_zip=False):
         """
         Function to control which plot methods are called depending on the
         arguments that were parsed
@@ -184,180 +240,164 @@ class IsoplotCli:
         :type metabolite_list: list of str
         :param data_object: object containing the prepared data
         :type data_object: class: 'isoplot.main.dataprep.IsoplotData'
-        :param zip: should figures be returned and exported in zip
-        :type zip: bool
+        :param build_zip: should figures be returned and exported in zip
+        :type build_zip: bool
         """
 
-        if zip:
+        if build_zip:
             figures = []
 
         for metabolite in metabolite_list:
             for value in self.args.value:
                 self.static_plot = StaticPlot(self.args.stack, value, data_object.dfmerge,
                                               self.args.run_name, metabolite, self.conditions, self.times,
-                                              self.args.format, display=False, rtrn=zip)
+                                              self.args.format, display=False, rtrn=build_zip)
 
                 self.int_plot = InteractivePlot(self.args.stack, value, data_object.dfmerge,
                                                 self.args.run_name, metabolite, self.conditions, self.times,
-                                                display=False, rtrn=zip)
+                                                display=False, rtrn=build_zip)
 
                 # STATIC PLOTS
                 if self.args.stacked_areaplot:
                     plot_name = "Static_Areaplots"
-                    if zip:
+                    if build_zip:
                         fig = self.static_plot.stacked_areaplot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.static_plot.stacked_areaplot()
-
                 if self.args.barplot and not (value == "mean_enrichment"):
                     plot_name = "Static_barplots"
-                    if zip:
+                    if build_zip:
                         fig = self.static_plot.barplot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.static_plot.barplot()
-
                 if self.args.meaned_barplot and not (value == "mean_enrichment"):
                     plot_name = "Static_barplots_SD"
-                    if zip:
+                    if build_zip:
                         fig = self.static_plot.mean_barplot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.static_plot.mean_barplot()
-
                 if self.args.barplot and (value == "mean_enrichment"):
                     plot_name = "Static_barplots"
-                    if zip:
+                    if build_zip:
                         fig = self.static_plot.mean_enrichment_plot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.static_plot.mean_enrichment_plot()
-
                 if self.args.meaned_barplot and (value == "mean_enrichment"):
                     plot_name = "Static_barplots_SD"
-                    if zip:
+                    if build_zip:
                         fig = self.static_plot.mean_enrichment_meanplot()
                         fname = plot_name + "_" + self.static_plot.static_fig_name
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.static_plot.mean_enrichment_meanplot()
-
                 # INTERACTIVE PLOTS
                 if self.args.interactive_barplot and not (value == "mean_enrichment"):
                     plot_name = "Interactive_barplots"
-                    if zip:
+                    if build_zip:
                         fig = self.int_plot.stacked_barplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.int_plot.stacked_barplot()
-
                 if self.args.interactive_barplot and not self.args.stack:
                     plot_name = "Interactive_unstacked_barplots"
-                    if zip:
+                    if build_zip:
                         fig = self.int_plot.unstacked_barplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.int_plot.unstacked_barplot()
-
                 if self.args.interactive_meanplot and not (value == "mean_enrichment"):
                     plot_name = "Interactive_barplots_SD"
-                    if zip:
+                    if build_zip:
                         fig = self.int_plot.stacked_meanplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.int_plot.stacked_meanplot()
-
                 if self.args.interactive_meanplot and not self.args.stack:
                     plot_name = "Interactive_barplots_SD"
-                    if zip:
+                    if build_zip:
                         fig = self.int_plot.unstacked_meanplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.int_plot.unstacked_meanplot()
-
                 if self.args.interactive_barplot and (value == "mean_enrichment"):
                     plot_name = "Interactive_barplots"
-                    if zip:
+                    if build_zip:
                         fig = self.int_plot.mean_enrichment_plot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.int_plot.mean_enrichment_plot()
-
                 if self.args.interactive_meanplot and (value == "mean_enrichment"):
                     plot_name = "Interactive_barplots_SD"
-                    if zip:
+                    if build_zip:
                         fig = self.int_plot.mean_enrichment_meanplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.int_plot.mean_enrichment_meanplot()
-
                 if self.args.interactive_areaplot:
                     plot_name = "Interactive_stackplots"
-                    if zip:
+                    if build_zip:
                         fig = self.int_plot.stacked_areaplot()
                         fname = plot_name + "_" + self.int_plot.filename
                         figures.append((fname, fig))
                     else:
                         self.dir_init(plot_name)
                         self.int_plot.stacked_areaplot()
-
         # MAPS
-        self.map = Map(data_object.dfmerge, self.args.run_name, self.args.annot, self.args.format, rtrn=zip)
-
+        self.map = Map(data_object.dfmerge, self.args.run_name, self.args.annot, self.args.format, rtrn=build_zip)
         if self.args.static_heatmap:
             plot_name = "static_heatmap"
-            if zip:
+            if build_zip:
                 fig = self.map.build_heatmap()
                 fname = plot_name + f".{self.map.fmt}"
                 figures.append((fname, fig))
             else:
                 self.dir_init(plot_name)
                 self.map.build_heatmap()
-
         if self.args.static_clustermap:
             plot_name = "static_clustermap"
-            if zip:
+            if build_zip:
                 fig = self.map.build_clustermap()
                 fname = plot_name + f".{self.map.fmt}"
                 figures.append((fname, fig))
             else:
                 self.dir_init(plot_name)
                 self.map.build_clustermap()
-
         if self.args.interactive_heatmap:
             self.map.fmt = "html"
             plot_name = "interactive_heatmap"
-            if zip:
+            if build_zip:
                 fig = self.map.build_interactive_heatmap()
                 fname = plot_name + f".{self.map.fmt}"
                 figures.append((fname, fig))
             else:
                 self.dir_init(plot_name)
                 self.map.build_interactive_heatmap()
-
-        if zip:
+        if build_zip:
             self.zip_export(figures, self.args.zip)
         if not self.args.galaxy:
             self.go_home()
@@ -365,7 +405,6 @@ class IsoplotCli:
     def initialize_cli(self):
         """Launch argument parsing and perform checks"""
 
-        self.parse_Args()
         self.args = self.parser.parse_args()
         handle = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

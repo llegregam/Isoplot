@@ -32,6 +32,9 @@ Modify the template as needed, save it and load it into the notebook after launc
 
 Launch the next cells and generate plots !
 
+.. note:: For more information on how to setup a python tool in a specific environment (recommended) using jupyter
+          notebooks, check out `this documentation <https://nmrquant.readthedocs.io/en/latest/quickstart.html#environment-installation>`_.
+
 Command-line interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -43,8 +46,10 @@ To process your data, type in a terminal :
 
 Here after the available options are enumerated and detailed.
 
-TODO
-
-
+.. argparse::
+   :module: isoplot.ui.isoplotcli
+   :func: parse_args
+   :prog: isoplot
+   :nodescription:
 
 
