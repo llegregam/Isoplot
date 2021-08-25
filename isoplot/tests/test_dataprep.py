@@ -10,7 +10,7 @@ from isoplot.main.dataprep import IsoplotData
 
 @pytest.fixture(scope='function', autouse=True)
 def data_object():
-    return IsoplotData(Path(r".\test_data\160419_T_Daubon_MC_principale_res.csv"))
+    return IsoplotData(Path(r".\test_data\160419_T_Daubon_MC_principale_res.csv").absolute())
 
 
 @pytest.fixture(scope='function', autouse=True)
