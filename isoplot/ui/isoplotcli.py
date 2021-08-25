@@ -82,7 +82,7 @@ class IsoplotCli:
         self.run_home = run_home
         self.static_plot = static_plot
         self.int_plot = int_plot
-        self.map = maps
+        self.maps = maps
         self.args = args
         self.metabolites = []
         self.conditions = []
@@ -368,35 +368,35 @@ class IsoplotCli:
                         self.dir_init(plot_name)
                         self.int_plot.stacked_areaplot()
         # MAPS
-        self.map = Map(data_object.dfmerge, self.args.run_name, self.args.annot, self.args.format, rtrn=build_zip)
+        self.maps = Map(data_object.dfmerge, self.args.run_name, self.args.annot, self.args.format, rtrn=build_zip)
         if self.args.static_heatmap:
             plot_name = "static_heatmap"
             if build_zip:
-                fig = self.map.build_heatmap()
-                fname = plot_name + f".{self.map.fmt}"
+                fig = self.maps.build_heatmap()
+                fname = plot_name + f".{self.maps.fmt}"
                 figures.append((fname, fig))
             else:
                 self.dir_init(plot_name)
-                self.map.build_heatmap()
+                self.maps.build_heatmap()
         if self.args.static_clustermap:
             plot_name = "static_clustermap"
             if build_zip:
-                fig = self.map.build_clustermap()
-                fname = plot_name + f".{self.map.fmt}"
+                fig = self.maps.build_clustermap()
+                fname = plot_name + f".{self.maps.fmt}"
                 figures.append((fname, fig))
             else:
                 self.dir_init(plot_name)
-                self.map.build_clustermap()
+                self.maps.build_clustermap()
         if self.args.interactive_heatmap:
-            self.map.fmt = "html"
+            self.maps.fmt = "html"
             plot_name = "interactive_heatmap"
             if build_zip:
-                fig = self.map.build_interactive_heatmap()
-                fname = plot_name + f".{self.map.fmt}"
+                fig = self.maps.build_interactive_heatmap()
+                fname = plot_name + f".{self.maps.fmt}"
                 figures.append((fname, fig))
             else:
                 self.dir_init(plot_name)
-                self.map.build_interactive_heatmap()
+                self.maps.build_interactive_heatmap()
         if build_zip:
             self.zip_export(figures, self.args.zip)
         if not self.args.galaxy:
