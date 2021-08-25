@@ -1,4 +1,5 @@
 """ Module for deploying pytest tests"""
+from pathlib import Path
 
 import pytest
 from pandas.api.types import is_numeric_dtype, is_string_dtype
@@ -9,7 +10,7 @@ from isoplot.main.dataprep import IsoplotData
 
 @pytest.fixture(scope='function', autouse=True)
 def data_object():
-    return IsoplotData(r".\test_data\160419_T_Daubon_MC_principale_res.csv")
+    return IsoplotData(Path(r".\test_data\160419_T_Daubon_MC_principale_res.csv"))
 
 
 @pytest.fixture(scope='function', autouse=True)
