@@ -11,7 +11,7 @@ from isoplot.main.dataprep import IsoplotData
 
 @pytest.fixture(scope='function', autouse=True)
 def data_object():
-    return IsoplotData("160419_T_Daubon_MC_principale_res.csv")
+    return IsoplotData(True)
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -63,7 +63,7 @@ class TestDataprep:
 
     def test_initial_df(self, data_object, columns, sample_names):
 
-        data_object.get_data()
+        data_object.get_data("160419_T_Daubon_MC_principale_res.csv")
         assert hasattr(data_object, 'data')
         assert not data_object.data.empty
         assert all(item in data_object.data.columns for item in columns)
@@ -86,7 +86,7 @@ class TestDataprep:
 
     def test_merge_function(self, data_object):
 
-        data_object.get_data()
+        data_object.get_data("160419_T_Daubon_MC_principale_res.csv")
         data_object.get_template(r".\test_data\modified_for_testing.xlsx")
         data_object.merge_data()
 
@@ -104,7 +104,7 @@ class TestDataprep:
 
     def test_prepare_data_function(self, data_object):
 
-        data_object.get_data()
+        data_object.get_data("160419_T_Daubon_MC_principale_res.csv")
         data_object.get_template(r".\test_data\modified_for_testing.xlsx")
         data_object.merge_data()
         data_object.prepare_data(False)
