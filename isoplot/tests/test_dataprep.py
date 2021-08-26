@@ -1,6 +1,6 @@
 """ Module for deploying pytest tests"""
 
-from pathlib import PurePath
+from pathlib import Path
 
 import pytest
 from pandas.api.types import is_numeric_dtype, is_string_dtype
@@ -11,7 +11,7 @@ from isoplot.main.dataprep import IsoplotData
 
 @pytest.fixture(scope='function', autouse=True)
 def data_object():
-    return IsoplotData(PurePath("./test_data/160419_T_Daubon_MC_principale_res.csv"))
+    return IsoplotData(Path("./test_data/160419_T_Daubon_MC_principale_res.csv").absolute())
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -64,7 +64,7 @@ class TestDataprep:
     def test_initial_df(self, data_object, columns, sample_names):
 
         data_object.get_data()
-
+        assert hasattr(data_object, 'data')
         assert not data_object.data.empty
         assert all(item in data_object.data.columns for item in columns)
         assert all(item in list(data_object.data["sample"]) for item in sample_names)
