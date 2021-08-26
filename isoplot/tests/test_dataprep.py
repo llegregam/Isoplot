@@ -11,7 +11,7 @@ from isoplot.main.dataprep import IsoplotData
 
 @pytest.fixture(scope='function', autouse=True)
 def data_object():
-    return IsoplotData(Path(r".\isoplot\tests\test_data\160419_T_Daubon_MC_principale_res.csv").absolute())
+    return IsoplotData(Path("./isoplot/tests/test_data/160419_T_Daubon_MC_principale_res.csv").resolve())
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -76,7 +76,7 @@ class TestDataprep:
 
     def test_validate_template(self, data_object, sample_names):
 
-        data_object.get_template(Path(r".\isoplot\tests\test_data\modified_for_testing.xlsx").absolute())
+        data_object.get_template(Path("./isoplot/tests/test_data/modified_for_testing.xlsx").resolve())
 
         assert not data_object.template.empty
         assert all(item in set(data_object.template["sample"]) for item in sample_names)
@@ -87,7 +87,7 @@ class TestDataprep:
     def test_merge_function(self, data_object):
 
         data_object.get_data()
-        data_object.get_template(r".\isoplot\tests\test_data\modified_for_testing.xlsx")
+        data_object.get_template(Path("./isoplot/tests/test_data/modified_for_testing.xlsx").resolve())
         data_object.merge_data()
 
         assert hasattr(data_object, "dfmerge")
@@ -105,7 +105,7 @@ class TestDataprep:
     def test_prepare_data_function(self, data_object):
 
         data_object.get_data()
-        data_object.get_template(r".\isoplot\tests\test_data\modified_for_testing.xlsx")
+        data_object.get_template(Path("./isoplot/tests/test_data/modified_for_testing.xlsx").resolve())
         data_object.merge_data()
         data_object.prepare_data(False)
 
