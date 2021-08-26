@@ -14,8 +14,9 @@ class IsoplotData:
     :type datapath: str
     """
 
-    def __init__(self, verbose=False):
+    def __init__(self, datapath, verbose=False):
 
+        self.datapath = datapath
         self.verbose = verbose
         self.data = None
         self.template = None
@@ -104,13 +105,13 @@ class IsoplotData:
                     raise ValueError(f"Column {i} not found in template file {template_input}")
             return data
 
-    def get_data(self, path):
+    def get_data(self):
         """Read data from tsv file and store in object data attribute."""
 
-        self.isoplot_logger.info(f'Reading datafile {path} \n')
+        self.isoplot_logger.info(f'Reading datafile {self.datapath} \n')
         try:
-            self.isoplot_logger.debug(f"Isocor Data path: {path}")
-            self.data = IsoplotData.load_isocor_data(path)
+            self.isoplot_logger.debug(f"Isocor Data path: {self.datapath}")
+            self.data = IsoplotData.load_isocor_data(self.datapath)
         except Exception:
             self.isoplot_logger.exception("Error while reading isocor data")
         self.isoplot_logger.info("Data is loaded")
