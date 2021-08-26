@@ -41,7 +41,7 @@ class IsoplotData:
         """Function to read incoming data"""
 
         datapath = pl.Path(path)
-
+        self.isoplot_logger.debug(f"Path to data: {datapath}")
         if not datapath.is_file():
             raise ValueError("No data file selected")
         try:
@@ -85,6 +85,7 @@ class IsoplotData:
                 return data
         else:
             datapath = pl.Path(input).resolve()
+            self.isoplot_logger.debug(f"Path to template: {datapath}")
             if not datapath.is_file():
                 raise ValueError("No data file selected")
             try:
