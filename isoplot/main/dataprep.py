@@ -41,7 +41,6 @@ class IsoplotData:
         """Function to read incoming data"""
 
         datapath = pl.Path(path)
-        self.isoplot_logger.debug(f"Path to data: {datapath}")
         if not datapath.is_file():
             raise ValueError("No data file selected")
         try:
@@ -62,30 +61,29 @@ class IsoplotData:
         return data
 
     @staticmethod
-    def load_template(input, excel_sheet=0):
+    def load_template(template_input, excel_sheet=0):
         """Function to read incoming template data"""
 
         # Since the template can be in excel format, when input comes from upload button in the notebook it is a
         # bytes file. So we check and handle this here
-        if isinstance(input, bytes):
+        if isinstance(template_input, bytes):
             toread = io.BytesIO()
-            toread.write(input)
+            toread.write(template_input)
             toread.seek(0)
             try:
-                data = pd.read_excel(input, engine='openpyxl', sheet_name=excel_sheet)
+                data = pd.read_excel(template_input, engine='openpyxl', sheet_name=excel_sheet)
             except ValueError:
-                data = pd.read_csv(input, sep=";")
+                data = pd.read_csv(template_input, sep=";")
                 if len(data.columns) == 1:
                     del data
-                    data = pd.read_csv(input, sep="\t")
+                    data = pd.read_csv(template_input, sep="\t")
                 return data
             except Exception as ex:
                 raise ValueError(f"There was a problem while processing the input template. Traceback: {ex}")
             else:
                 return data
         else:
-            datapath = pl.Path(input).resolve()
-            self.isoplot_logger.debug(f"Path to template: {datapath}")
+            datapath = pl.Path(template_input).resolve()
             if not datapath.is_file():
                 raise ValueError("No data file selected")
             try:
@@ -99,12 +97,12 @@ class IsoplotData:
                             data = pd.read_csv(dp, sep="\t")
                 except Exception as err:
                     raise ValueError(
-                        f"Error during the lecture of the template file {input}. "
+                        f"Error during the lecture of the template file {template_input}. "
                         f"Please check file content and format. Traceback: {err}")
             to_check = ['sample', 'condition', 'condition_order', 'time', 'number_rep', 'normalization']
             for i in to_check:
                 if i not in data.columns:
-                    raise ValueError(f"Column {i} not found in template file {input}")
+                    raise ValueError(f"Column {i} not found in template file {template_input}")
             return data
 
     def get_data(self):
@@ -112,6 +110,7 @@ class IsoplotData:
 
         self.isoplot_logger.info(f'Reading datafile {self.datapath} \n')
         try:
+            self.isoplot_logger.debug(f"Isocor Data path: {self.datapath}")
             self.data = IsoplotData.load_isocor_data(self.datapath)
         except Exception:
             self.isoplot_logger.exception("Error while reading isocor data")
@@ -141,6 +140,7 @@ class IsoplotData:
 
         try:
             self.isoplot_logger.debug('Trying to read template')
+            self.isoplot_logger.debug(f"Template path: {path}")
             self.template = IsoplotData.load_template(path)
         except Exception:
             self.isoplot_logger.exception("Error while loading data")
