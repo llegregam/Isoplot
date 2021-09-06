@@ -102,68 +102,6 @@ class IsoplotCli:
         """Exit after work is done"""
         os.chdir(self.home)
 
-    # def add_Args(self):
-    #     """
-    #     Parse arguments from user
-    #
-    #     :return: Argument Parser object
-    #     :rtype: class: argparse.ArgumentParser
-    #     """
-    #     pass
-        # parse_Args(self.parser)
-        # self.parser.add_argument('input_path', help="Path to datafile")
-        # self.parser.add_argument("run_name", help="Name of the current run")
-        # self.parser.add_argument("format", help="Format of generated file")
-        #
-        # values = ['corrected_area', 'isotopologue_fraction', 'mean_enrichment']
-        # self.parser.add_argument('--value', choices=values, default='isotopologue_fraction',
-        #                          action="store", required=True, nargs='*',
-        #                          help="Select values to plot. This option can be given multiple times")
-        #
-        # self.parser.add_argument('-m', '--metabolite', default='all',
-        #                          help="Metabolite(s) to plot. For all, type in 'all' ")
-        # self.parser.add_argument('-c', '--condition', default='all',
-        #                          help="Condition(s) to plot. For all, type in 'all' ")
-        # self.parser.add_argument('-t', '--time', default='all',
-        #                          help="Time(s) to plot. For all, type in 'all' ")
-        # self.parser.add_argument("-gt", "--generate_template", action="store_true",
-        #                          help="Generate the template using datafile metadata")
-        # self.parser.add_argument("-tp", "--template_path", type=str,
-        #                          help="Path to template file")
-        #
-        # self.parser.add_argument('-sa', '--stacked_areaplot', action="store_true",
-        #                          help='Create static stacked areaplot')
-        # self.parser.add_argument("-bp", "--barplot", action="store_true",
-        #                          help='Create static barplot')
-        # self.parser.add_argument('-mb', '--meaned_barplot', action="store_true",
-        #                          help='Create static barplot with meaned replicates')
-        #
-        # self.parser.add_argument('-IB', '--interactive_barplot', action="store_true",
-        #                          help='Create interactive stacked barplot')
-        # self.parser.add_argument('-IM', '--interactive_meanplot', action="store_true",
-        #                          help='Create interactive stacked barplot with meaned replicates')
-        # self.parser.add_argument('-IS', '--interactive_areaplot', action="store_true",
-        #                          help='Create interactive stacked areaplot')
-        #
-        # self.parser.add_argument('-hm', '--static_heatmap', action="store_true",
-        #                          help='Create a static heatmap using mean enrichment data')
-        # self.parser.add_argument('-cm', '--static_clustermap', action="store_true",
-        #                          help='Create a static heatmap with clustering using mean enrichment data')
-        # self.parser.add_argument('-HM', '--interactive_heatmap', action="store_true",
-        #                          help='Create interactive heatmap using mean enrichment data')
-        #
-        # self.parser.add_argument('-s', '--stack', action="store_false",
-        #                          help='Add option if barplots should be unstacked')
-        # self.parser.add_argument('-v', '--verbose', action="store_true",
-        #                          help='Turns logger to debug mode')
-        # self.parser.add_argument('-a', '--annot', action='store_true',
-        #                          help='Add option if annotations should be added on maps')
-        # self.parser.add_argument('-z', '--zip', type=str,
-        #                          help="Add option & path to export plots in zip file")
-        #
-        # self.parser.add_argument('-g', '--galaxy', action='store_true',
-        #                          help='Option for galaxy integration. Not useful for local usage')
-
     @staticmethod
     def get_cli_input(arg, param, data_object):
         """

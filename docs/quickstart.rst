@@ -12,9 +12,16 @@ Then, open a terminal (e.g. run Anaconda Prompt if you have Anaconda installed) 
 
 	pip install isoplot
 
+If you have an old version of the software installed, you can update to the latest using the following command:
+
+.. code-block:: bash
+
+    pip install -U isoplot
+
 You are now ready to start Isoplot.
 
 There are two ways to use isoplot : through the dedicated jupyter notebook (recommended) or through the command line.
+
 
 Jupyter Notebook
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
