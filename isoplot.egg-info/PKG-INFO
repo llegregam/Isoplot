@@ -1,0 +1,43 @@
+Metadata-Version: 2.1
+Name: isoplot
+Version: 2.0.dev0
+Summary: Generate figures from Isocor output
+Home-page: https://github.com/llegregam/Isoplot
+Author: Loïc Le Grégam
+Author-email: loic.le-gregam@insa-toulouse.fr
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Natural Language :: French
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Provides-Extra: dev
+License-File: LICENSE.txt
+
+Isoplot
+=======
+
+**Isoplot is a software for the visualisation of MS data from C13 labelling experiments.**
+It takes as input corrected MS data from `IsoCor <https://isocor.readthedocs.io/en/latest/>`_ tsv format.
+Isoplot outputs static and interactive plots that are then used for quality assessment, biological interpretation, 
+project reports, published papers and so forth. 
+
+It is one of the routine tools used on the `MetaToul platform <https://www6.toulouse.inrae.fr/metatoul>`_.
+
+The code is open-source, and available on `GitHub <github.com/llegregam/isoplot>`_ under a GPLv3 license.
+
+The documentation relative to Isoplot's installation and usage can be found on `ReadTheDocs <https://isoplot.readthedocs.io/>`_.
+
+.. rubric:: Key Features
+
+* **Creation of static and interactive plots** (barplot, heatmap, clustermap, etc...)
+* **Command-line interface**
+* **Jupyter Notebook graphical interface** using ipywidgets
+* **Open-source, free and easy to install** everywhere where Python 3 is available
+* **Biologist-friendly**
+
