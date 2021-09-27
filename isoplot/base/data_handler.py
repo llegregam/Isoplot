@@ -36,7 +36,9 @@ class DataHandler:
 
         self.data = None
         self.template = None
-        self.final_data = None
+        self.individual_data = None
+        self.mean_data = pd.DataFrame()
+        self.mean_data = pd.DataFrame()
 
     def import_isocor_data(self, data_path):
         """
@@ -137,7 +139,7 @@ class DataHandler:
             if df is None:
                 raise RuntimeError(f"{df} is missing. Please import and try again.")
         try:
-            self.final_data = self.data.merge(self.template)
+            self.individual_data = self.data.merge(self.template)
         except Exception as merge_err:
             raise RuntimeError(f"There was a problem merging the template with the input data. "
                                f"Traceback: \n {merge_err}")
@@ -151,70 +153,98 @@ class DataHandler:
         # As corrected areas are the only data points that are absolute and not relative, the normalization process
         # should only apply to them
         try:
-            self.final_data["corrected_area"] = \
-                self.final_data["corrected_area"] / self.final_data["normalization"]
+            self.individual_data["corrected_area"] = \
+                self.individual_data["corrected_area"] / self.individual_data["normalization"]
         except Exception as norm_err:
             raise ValueError(f"There was an unknown error while normalizing the data. "
                              f"Traceback:\n {norm_err}")
         else:
             self.logger.debug("The corrected_area column has been normalized")
 
+    def _compute_means(self):
+        """Compute means and sds and place into individual dataframes."""
+
+        self.logger.info("Computing means and standard deviations")
+        # check that numerical types are well defined
+        for col in ["time", "number_rep"]:
+            if self.individual_data[col].dtypes != np.int64:
+                try:
+                    self.individual_data[col].apply(np.int64)
+                except Exception as convert_err:
+                    raise RuntimeError(f"Error while converting {col} column to int64. Traceback: \n{convert_err}")
+        self.individual_data.condition = self.individual_data.condition.str.replace("_", "-")
+        # Prepare individual dataset for mean and SD calculations (they will inherit it's structure)
+        self.individual_data.drop(["derivative", "normalization", "Unnamed: 0", "residuum"], axis=1, inplace=True)
+        self.individual_data.sort_values(by=["metabolite", "condition", "time", "isotopologue"], inplace=True)
+        self.individual_data.set_index(["metabolite", "condition", "time", "number_rep", "isotopologue"], inplace=True)
+        # Compute the means and SDs
+        for value in ["corrected_area", "isotopologue_fraction", "mean_enrichment"]:
+            self.mean_data[value + "_mean"] = self.individual_data.groupby(
+                ["metabolite", "condition", "time", "isotopologue"])[value].mean()
+            self.mean_data[value + "_sd"] = self.individual_data.groupby(
+                ["metabolite", "condition", "time", "isotopologue"])[value].std()
+        self.logger.debug(f"Individual data: \n{self.individual_data}")
+        self.logger.debug(f"Mean data: \n{self.mean_data}")
+        # Handle NAs
+        self.individual_data.fillna(0, inplace=True)
+        self.mean_data.fillna(0, inplace=True)
+        self.logger.info("Means and SDs have been calculated")
+
+    def _get_missing_column(self):
+        """We get the condition order column from individual data and insert it back into mean data"""
+
+        # We join the condition order column from individual data onto mean data to keep it
+        self.mean_data = self.mean_data.join(
+            self.individual_data.condition_order.reset_index(level=["number_rep", "isotopologue"], drop=True),
+            on=["metabolite", "condition", "time"],
+            how="inner").drop_duplicates()
+
     def _generate_ids(self):
         """Generate an ID column for identifying each row uniquely"""
 
         self.logger.debug("Attempting to generate the IDs")
-        self.final_data.condition = self.final_data.condition.str.replace("_", "-")
+        self.individual_data.reset_index(inplace=True)
+        self.mean_data.reset_index(inplace=True)
         try:
-            self.final_data["ID"] = self.final_data.condition.apply(str) + "_T" + self.final_data.time.apply(str) + \
-                                 "_" + self.final_data.number_rep.apply(str)
+            self.individual_data["ID"] = self.individual_data.condition.apply(str) + "_T" \
+                                         + self.individual_data.time.apply(str) + "_" \
+                                         + self.individual_data.number_rep.apply(str)
+            self.mean_data["ID"] = self.mean_data.condition.apply(str) + "_T" + self.mean_data.time.apply(str)
         except Exception as id_err:
             raise ValueError(f"Error while generating the ID column. Traceback: \n{id_err}")
         else:
+            self.individual_data.set_index(["metabolite", "condition", "time", "number_rep", "isotopologue"],
+                                           inplace=True)
+            self.mean_data.set_index(["metabolite", "condition", "time", "isotopologue"],
+                                           inplace=True)
             self.logger.debug("IDs have been generated")
 
     def _prepare_export(self):
         """
         Prepare data for export. Calculate means and sds for each data group.
         """
-        for col in ["time", "number_rep"]:
-            if self.final_data[col].dtypes != np.int64:
-                try:
-                    self.final_data[col].apply(np.int64)
-                except Exception as convert_err:
-                    raise RuntimeError(f"Error while converting {col} column to int64. Traceback: \n{convert_err}")
-        self.final_data.drop(["derivative", "normalization", "Unnamed: 0", "residuum"], axis=1, inplace=True)
-        for value in ["corrected_area", "isotopologue_fraction", "mean_enrichment"]:
-            self.final_data = self.final_data.join(self.final_data.groupby(
-                ["metabolite", "condition", "time", "isotopologue"])[value].mean(),
-               on=["metabolite", "condition", "time", "isotopologue"],
-               rsuffix="_mean")
-        for value in ["corrected_area", "isotopologue_fraction", "mean_enrichment"]:
-            self.final_data = self.final_data.join(self.final_data.groupby(
-                ["metabolite", "condition", "time", "isotopologue"])[value].std(),
-               on=["metabolite", "condition", "time", "isotopologue"],
-               rsuffix="_std")
-        self.final_data.fillna(0, inplace=True)
-        self.final_data = self.final_data[["ID", "metabolite", "condition", "time", "isotopologue", "number_rep",
-                                           "corrected_area", "corrected_area_mean", "corrected_area_std",
-                                           "isotopologue_fraction", "isotopologue_fraction_mean",
-                                           "isotopologue_fraction_std", "mean_enrichment", "mean_enrichment_mean",
-                                           "mean_enrichment_std", "condition_order"]]
-        self.final_data.sort_values(by=["metabolite", "condition", "time", "isotopologue"], inplace=True)
-        self.final_data.set_index(["metabolite", "condition", "time", "number_rep", "isotopologue"], inplace=True)
+        self.data_for_export = self.individual_data.reset_index(level="number_rep").drop("ID", axis=1).copy()
+        self.data_for_export = self.data_for_export.join(self.mean_data.drop("ID", axis=1))
+        self.data_for_export = self.data_for_export[["number_rep", "sample","condition_order", "area", "corrected_area",
+                                                     "corrected_area_mean", "corrected_area_sd", "isotopologue_fraction",
+                                                     "isotopologue_fraction_mean", "isotopologue_fraction_sd",
+                                                     "mean_enrichment", "mean_enrichment_mean", "mean_enrichment_sd"]]
 
     def compute_data(self):
-        """Compute data and have it ready for export & use by the plotting module"""
+        """Clean the data, compute means and sds and have it ready for plotting"""
 
         self.logger.info("Launching the computation of data...")
         self._merge_data()
-        if self.final_data["normalization"].any() != 1:
+        if self.individual_data["normalization"].any() != 1:
             self._normalize_data()
+        self._compute_means()
+        self._get_missing_column()
         self._generate_ids()
-        self._prepare_export()
         self.logger.info("Data has been computed. Ready for export and/or plotting.")
 
     def export_data(self, file_name):
-        """Export data to tabular format"""
+        """Prepare and export data to tabular format"""
 
-        self.final_data.to_csv(f"./{file_name}.tsv", sep="\t")
+        self._prepare_export()
+        self.data_for_export.to_csv(f"./{file_name}.tsv", sep="\t")
         self.logger.info("Clean data has been exported")

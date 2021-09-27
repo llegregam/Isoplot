@@ -29,13 +29,14 @@ def normalization_test_proper_values(data_object, path_to_data, path_to_template
     data_object.import_isocor_data(path_to_data)
     data_object.import_template(path_to_template)
     data_object._merge_data()
-    corrected_area = data_object.final_data["corrected_area"].values
+    corrected_area = data_object.individual_data["corrected_area"].values
     test_values = [1, 2, 5, 10, 16, 32, 1.5, 10.125, 100.18585]
     results = {val: corrected_area / val for val in test_values}
     return results
 
 class TestDataHandler:
 
+    #TODO: Modify tests to include testing for the 2 new dataframes (means and sds)
     def test_isocor_data_import(self, data_object, path_to_data):
 
         data_object.import_isocor_data(path_to_data)
@@ -83,8 +84,8 @@ class TestDataHandler:
                 'corrected_area', 'isotopologue_fraction', 'residuum', 'mean_enrichment',
                 'condition', 'condition_order', 'time', 'number_rep', 'normalization']
         for col in cols:
-            assert col in data_object.final_data.columns
-            assert not data_object.final_data[col].empty
+            assert col in data_object.individual_data.columns
+            assert not data_object.individual_data[col].empty
 
     @pytest.mark.parametrize("value", [
         1,
@@ -102,7 +103,7 @@ class TestDataHandler:
         data_object.import_isocor_data(path_to_data)
         data_object.import_template(path_to_template)
         data_object._merge_data()
-        data_object.final_data["normalization"] = value
+        data_object.individual_data["normalization"] = value
         data_object._normalize_data()
-        assert data_object.final_data["corrected_area"].values.all() == normalization_test_proper_values[value].all()
+        assert data_object.individual_data["corrected_area"].values.all() == normalization_test_proper_values[value].all()
 
