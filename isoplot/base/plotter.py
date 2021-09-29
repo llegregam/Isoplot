@@ -286,13 +286,17 @@ class InteractivePlot(StaticPlot):
             raise RuntimeError("Error while pivoting the data")
 
         x_range = df.index.to_list()
-        isotops = df.columns.to_list()
-        x = [(idx, isotop) for idx in x_range for isotop in isotops]
+        stackers = df.columns.to_list()
+        # We prepare the labels for tooltips on the plot
+        x = [(idx, stack) for idx in x_range for stack in stackers]
+        contition_time_replicate = [i[0] for i in x]
+        isotops = [i[1] for i in x]
+        conditions, times, replicates = InteractivePlot._split_ids(contition_time_replicate)
         # We get the list of all the top values of the bars in our plot
         tops = [item for sublist in [row[1].to_list() for row in df.iterrows()] for item in sublist]
-        conditions, times, replicates = InteractivePlot._split_ids(x_range)
-        source = ColumnDataSource(dict(x=x, tops=tops, conditions=conditions, times=times, replicates=replicates))
-        # TODO: Fix this, each condition time and rep should be multiplied for each isotopologue
+        source = ColumnDataSource(dict(x=x, tops=tops, conditions=conditions,
+                                       times=times, replicates=replicates,
+                                       isotops=isotops))
         tooltips = [
             ("Condition", "@conditions"),
             ("Time", "@times"),
@@ -312,7 +316,7 @@ class InteractivePlot(StaticPlot):
                   source=source,
                   fill_color=factor_cmap('x',
                                          palette=cc.glasbey_dark,
-                                         factors=isotops,
+                                         factors=stackers,
                                          start=1, end=2),
                   line_color="white")
         plot.xaxis.major_label_orientation = math.pi / 4
