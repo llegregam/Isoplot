@@ -5,7 +5,8 @@ import math
 import colorcet as cc
 import matplotlib.pyplot as plt
 from bokeh.io import output_file, show
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, FactorRange
+from bokeh.transform import factor_cmap
 from bokeh.plotting import figure
 
 
@@ -14,7 +15,7 @@ class StaticPlot:
     Class to generate the different Static Plots using pandas built-in plotting modules
     """
 
-    def __init__(self, data, mean_data, metabolite, conditions, times, value, fmt, stack=True, display=True):
+    def __init__(self, data, mean_data, metabolite, conditions, times, value, stack=True, display=True):
         """
         During initialization, data is filtered on the desired metabolite, conditions, times and value to plot. We also
         input the desired format, and booleans to define if bars in barplots should be unstacked and if plots should be
@@ -25,7 +26,6 @@ class StaticPlot:
         :param conditions: List of conditions to plot
         :param times: List of time points to plot
         :param value: Which value should be plotted (mean enrichment, isotopologue fraction or corrected areas)
-        :param fmt: Format in which plots should be saved
         :param stack: While true bars are stacked
         :param display: While true plots are displayed
         """
@@ -39,7 +39,6 @@ class StaticPlot:
         self.conditions = conditions
         self.times = times
         self.value = value
-        self.fmt = fmt
         self.stack = stack
         self.display = display
         self.WIDTH = 30
@@ -109,6 +108,9 @@ class StaticPlot:
 
 
 class InteractivePlot(StaticPlot):
+    """
+    Class to generate the different Interactive Plots using the bokeh package
+    """
 
     def __init__(self, data, mean_data, metabolite, conditions, times, value, stack=True, display=True):
         super().__init__(data, mean_data, metabolite, conditions, times, value, stack, display)
@@ -178,18 +180,28 @@ class InteractivePlot(StaticPlot):
         return whisker_points
 
     def _pivot_data(self, mean):
+        """
+        Pivot the data to get the isotopologues as columns.
 
-        df = self.mean_data.pivot_table(index=["condition_order", "ID"],
-                                        columns="isotopologue",
-                                        values=self.value + "_mean").sort_index(
-            level="condition_order").droplevel(level="condition_order")
+        :param mean: should means be computed (error bars)
+        :return: pivoted dataframes
+        """
+
         if mean:
+            df = self.mean_data.pivot_table(index=["condition_order", "ID"],
+                                            columns="isotopologue",
+                                            values=self.value + "_mean").sort_index(
+                level="condition_order").droplevel(level="condition_order")
             df_sds = self.mean_data.pivot_table(index=["condition_order", "ID"],
                                                 columns="isotopologue",
                                                 values=self.value + "_sd").sort_index(
                 level="condition_order").droplevel(level="condition_order")
             return df, df_sds
         else:
+            df = self.data.pivot_table(index=["condition_order", "ID"],
+                                            columns="isotopologue",
+                                            values=self.value).sort_index(
+                level="condition_order").droplevel(level="condition_order")
             return df
 
     def _build_stacked_barplot(self, mean):
@@ -203,7 +215,7 @@ class InteractivePlot(StaticPlot):
         try:
             df, df_sds = self._pivot_data(mean)
             df.columns, df_sds.columns = df.columns.astype(str), df_sds.columns.astype(str)
-        except TypeError:
+        except ValueError:
             df = self._pivot_data(mean)
             df.columns = df.columns.astype(str)
         except Exception:
@@ -259,21 +271,54 @@ class InteractivePlot(StaticPlot):
 
     def _build_unstacked_barplot(self, mean):
         """
-
-        :param mean:
-        :return:
+        Build grouped bar chart
+        :param mean: Should means be computed
+        :return: grouped bar chart
         """
 
         try:
             df, df_sds = self._pivot_data(mean)
             df.columns, df_sds.columns = df.columns.astype(str), df_sds.columns.astype(str)
-        except TypeError:
+        except ValueError:
             df = self._pivot_data(mean)
             df.columns = df.columns.astype(str)
         except Exception:
             raise RuntimeError("Error while pivoting the data")
 
-
+        x_range = df.index.to_list()
+        isotops = df.columns.to_list()
+        x = [(idx, isotop) for idx in x_range for isotop in isotops]
+        # We get the list of all the top values of the bars in our plot
+        tops = [item for sublist in [row[1].to_list() for row in df.iterrows()] for item in sublist]
+        conditions, times, replicates = InteractivePlot._split_ids(x_range)
+        source = ColumnDataSource(dict(x=x, tops=tops, conditions=conditions, times=times, replicates=replicates))
+        # TODO: Fix this, each condition time and rep should be multiplied for each isotopologue
+        tooltips = [
+            ("Condition", "@conditions"),
+            ("Time", "@times"),
+            ("Replicate", "@replicates"),
+            ("Value", "@tops")
+        ]
+        plot = figure(
+            x_range=FactorRange(*x),
+            plot_width=self.WIDTH,
+            plot_height=self.HEIGHT,
+            tools=self.plot_tools,
+            tooltips=tooltips
+        )
+        plot.vbar(x='x',
+                  top='tops',
+                  width=0.9,
+                  source=source,
+                  fill_color=factor_cmap('x',
+                                         palette=cc.glasbey_dark,
+                                         factors=isotops,
+                                         start=1, end=2),
+                  line_color="white")
+        plot.xaxis.major_label_orientation = math.pi / 4
+        plot.y_range.start = 0
+        plot.x_range.range_padding = 0.1
+        return plot
 
     def barplot(self, mean=False):
 
