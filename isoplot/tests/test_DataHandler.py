@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import tempfile
 
 import pytest
 import pandas as pd
@@ -34,9 +35,10 @@ def normalization_test_proper_values(data_object, path_to_data, path_to_template
     results = {val: corrected_area / val for val in test_values}
     return results
 
+
 class TestDataHandler:
 
-    #TODO: Modify tests to include testing for the 2 new dataframes (means and sds)
+    # TODO: Modify tests to include testing for the 2 new dataframes (means and sds)
     def test_isocor_data_import(self, data_object, path_to_data):
 
         data_object.import_isocor_data(path_to_data)
@@ -57,11 +59,12 @@ class TestDataHandler:
     def test_template_generation(self, data_object, path_to_data):
 
         data_object.import_isocor_data(path_to_data)
-        data_object.generate_template()
-        # TODO: This should be re-written to use a system of temporary files. Currently this will probably create errors
-        # TODO: during Continuous Integration tests
-        template = pd.read_excel("ModifyThis.xlsx")
-        os.remove("ModifyThis.xlsx")
+        home = Path(".").resolve()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            os.chdir(tmpdir)
+            data_object.generate_template()
+            template = pd.read_excel("ModifyThis.xlsx")
+            os.chdir(home)
         for col in template.columns:
             assert col in ["sample", "condition", "condition_order", "time", "number_rep", "normalization"]
         for sample in template["sample"]:
@@ -105,5 +108,31 @@ class TestDataHandler:
         data_object._merge_data()
         data_object.individual_data["normalization"] = value
         data_object._normalize_data()
-        assert data_object.individual_data["corrected_area"].values.all() == normalization_test_proper_values[value].all()
+        assert data_object.individual_data["corrected_area"].values.all() == normalization_test_proper_values[
+            value].all()
 
+    def test_compute_means(self, data_object, path_to_data, path_to_template):
+
+        data_object.import_isocor_data(path_to_data)
+        data_object.import_template(path_to_template)
+        data_object._merge_data()
+        data_object._compute_means()
+        assert hasattr(data_object, "mean_data")
+        for val in [
+            "corrected_area_mean",
+            "isotopologue_fraction_mean",
+            "mean_enrichment_mean",
+            "corrected_area_sd",
+            "isotopologue_fraction_sd",
+            "mean_enrichment_sd"
+        ]:
+            assert val in data_object.mean_data.columns
+
+    def test_missing_column_get(self, data_object, path_to_data, path_to_template):
+
+        data_object.import_isocor_data(path_to_data)
+        data_object.import_template(path_to_template)
+        data_object._merge_data()
+        data_object._compute_means()
+        data_object._get_missing_column()
+        assert "condition_order" in data_object.mean_data.columns
