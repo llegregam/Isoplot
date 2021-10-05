@@ -4,10 +4,12 @@ import math
 
 import colorcet as cc
 import matplotlib.pyplot as plt
-from bokeh.io import output_file, show
-from bokeh.models import ColumnDataSource, FactorRange
+from bokeh.io import output_file, show, save
+from bokeh.models import FactorRange, BasicTicker, ColorBar, LinearColorMapper, PrintfTickFormatter, ColumnDataSource
 from bokeh.transform import factor_cmap
 from bokeh.plotting import figure
+import seaborn as sns
+import pandas as pd
 
 
 class StaticPlot:
@@ -114,7 +116,6 @@ class InteractivePlot(StaticPlot):
 
     def __init__(self, data, mean_data, metabolite, conditions, times, value, stack=True, display=True):
         super().__init__(data, mean_data, metabolite, conditions, times, value, stack, display)
-        self.cds = ColumnDataSource(self.data)
         self.filename = self.metabolite + "_" + self.value + ".html"
         output_file(self.filename)
         self.WIDTH = 1080
@@ -154,8 +155,7 @@ class InteractivePlot(StaticPlot):
         else:
             raise ValueError('Number of underscores is different from 2 or 3')
 
-    @staticmethod
-    def _compute_whisker_points(df, df_sds):
+    def _compute_whisker_points(self, df, df_sds, labels):
         """
         Compute the bottom, top and base values for placing whiskers on a stacked bar plot
 
@@ -164,12 +164,16 @@ class InteractivePlot(StaticPlot):
         :return:
         """
 
-        heights = df.cumsum(axis=1)
-        upper_df = heights + df_sds
-        lower_df = heights - df_sds
-        base = df.index.to_list()
+        if self.stack:
+            df = df.cumsum(axis=1)
+        upper_df = df + df_sds
+        lower_df = df - df_sds
         whisker_points = {}
-        for col in heights.columns:
+        for col in df.columns:
+            if len(labels) > len(df.index):
+                base = [base for base in labels if base[1] == col]
+            else:
+                base = labels
             whisker_points.update(
                 {col: {
                     "upper": upper_df[col].to_list(),
@@ -199,8 +203,8 @@ class InteractivePlot(StaticPlot):
             return df, df_sds
         else:
             df = self.data.pivot_table(index=["condition_order", "ID"],
-                                            columns="isotopologue",
-                                            values=self.value).sort_index(
+                                       columns="isotopologue",
+                                       values=self.value).sort_index(
                 level="condition_order").droplevel(level="condition_order")
             return df
 
@@ -261,7 +265,7 @@ class InteractivePlot(StaticPlot):
         plot.outline_line_color = "black"
         if mean:
             from bokeh.models import Whisker
-            whisker_points = InteractivePlot._compute_whisker_points(df, df_sds)
+            whisker_points = self._compute_whisker_points(df, df_sds, x_range)
             for key in whisker_points.keys():
                 cds = ColumnDataSource(data=whisker_points[key])
                 plot.add_layout(
@@ -289,20 +293,31 @@ class InteractivePlot(StaticPlot):
         stackers = df.columns.to_list()
         # We prepare the labels for tooltips on the plot
         x = [(idx, stack) for idx in x_range for stack in stackers]
-        contition_time_replicate = [i[0] for i in x]
+        labels = [i[0] for i in x]
         isotops = [i[1] for i in x]
-        conditions, times, replicates = InteractivePlot._split_ids(contition_time_replicate)
         # We get the list of all the top values of the bars in our plot
         tops = [item for sublist in [row[1].to_list() for row in df.iterrows()] for item in sublist]
-        source = ColumnDataSource(dict(x=x, tops=tops, conditions=conditions,
-                                       times=times, replicates=replicates,
-                                       isotops=isotops))
-        tooltips = [
-            ("Condition", "@conditions"),
-            ("Time", "@times"),
-            ("Replicate", "@replicates"),
-            ("Value", "@tops")
-        ]
+        if not mean:
+            conditions, times, replicates = InteractivePlot._split_ids(labels)
+            source = ColumnDataSource(dict(x=x, tops=tops, conditions=conditions,
+                                           times=times, replicates=replicates,
+                                           isotops=isotops))
+            tooltips = [
+                ("Condition", "@conditions"),
+                ("Time", "@times"),
+                ("Replicate", "@replicates"),
+                ("Value", "@tops")
+            ]
+        else:
+            conditions, times = InteractivePlot._split_ids(labels)
+            source = ColumnDataSource(dict(x=x, tops=tops, conditions=conditions,
+                                           times=times, isotops=isotops)
+                                      )
+            tooltips = [
+                ("Condition", "@conditions"),
+                ("Time", "@times"),
+                ("Value", "@tops")
+            ]
         plot = figure(
             x_range=FactorRange(*x),
             plot_width=self.WIDTH,
@@ -319,10 +334,39 @@ class InteractivePlot(StaticPlot):
                                          factors=stackers,
                                          start=1, end=2),
                   line_color="white")
+        if mean:
+            from bokeh.models import Whisker
+            whisker_points = self._compute_whisker_points(df, df_sds, x)
+            for key in whisker_points.keys():
+                cds = ColumnDataSource(data=whisker_points[key])
+                plot.add_layout(
+                    Whisker(source=cds, base="base", upper="upper", lower="lower", level="overlay")
+                )
         plot.xaxis.major_label_orientation = math.pi / 4
         plot.y_range.start = 0
         plot.x_range.range_padding = 0.1
         return plot
+
+    def stacked_areaplot(self, mean=False):
+
+        # TODO: fix tooltips not showing
+
+        df = self._pivot_data(mean)
+        data_points = {str(col): df[col].to_list() for col in df.columns}
+        stackers = list(data_points.keys())
+        data_points.update({"x": df.index.to_list()})
+        source = ColumnDataSource(data_points)
+        tooltips = [
+            ("X", "@x"),
+            ("Value", "@$name")
+        ]
+        plot = figure(x_range=data_points["x"], width=self.WIDTH, height=self.HEIGHT, y_axis_label=self.value,
+                      tooltips=tooltips, tools=self.plot_tools)
+        plot.varea_stack(stackers, x="x", source=source, color=cc.glasbey_dark[:len(stackers)])
+        plot.xaxis.major_label_orientation = math.pi / 4
+        plot.y_range.start = 0
+        plot.x_range.range_padding = 0.1
+        show(plot)
 
     def barplot(self, mean=False):
 
@@ -331,3 +375,117 @@ class InteractivePlot(StaticPlot):
         else:
             plot = self._build_unstacked_barplot(mean)
         show(plot)
+
+
+class Map:
+    """
+    Class to create maps from Isocor output (MS data from C13 labelling experiments)
+
+    :param annot: Should annotations be apparent on map or not
+    :type annot: Bool
+    """
+
+    def __init__(self, data, name, annot, fmt, display=False):
+
+        self.data = data
+        self.name = name
+        self.annot = annot
+        self.fmt = fmt
+        self.display = display
+
+        # Il faut préparer les données pour les maps:
+        self.heatmapdf = self.data[self.data['mean_enrichment'] != 0].copy()
+        self.heatmapdf.drop_duplicates(inplace=True)
+        self.heatmapdf.dropna(inplace=True)
+        self.heatmapdf.reset_index(inplace=True)
+        self.heatmapdf.set_index("metabolite", inplace=True)
+        self.heatmapdf['Condition_Time'] = self.heatmapdf['condition'].apply(str) + '_T' + self.heatmapdf['time'].apply(
+            str)
+        self.heatmapdf = self.heatmapdf.groupby(
+            ['metabolite', 'Condition_Time'])['mean_enrichment'].mean()
+        self.heatmapdf = self.heatmapdf.unstack(0)
+        self.dc_heatmap = self.heatmapdf.describe(include='all')
+        self.heatmap_center = self.dc_heatmap.iloc[5, 0].mean()
+        self.clustermapdf = self.heatmapdf.fillna(value=0)
+
+    def build_heatmap(self):
+        """
+        Create a heatmap of mean_enrichment data across
+        all conditions & times & metabolites
+        """
+
+        fig, ax = plt.subplots(figsize=(30, 30))
+        sns.set(font_scale=1)
+        sns.heatmap(self.heatmapdf, vmin=0.02,
+                    robust=True, center=self.heatmap_center,
+                    annot=self.annot, fmt="f", linecolor='black',
+                    linewidths=.2, cmap='Blues', ax=ax)
+        plt.yticks(rotation=0, fontsize=20)
+        plt.xticks(rotation=45, fontsize=20)
+        if self.display:
+            plt.show()
+        return fig
+
+    def build_clustermap(self):
+        """
+        Create a clustermap of mean_enrichment data across
+        all conditions & times & metabolites
+        """
+
+        sns.set(font_scale=1)
+        cg = sns.clustermap(self.clustermapdf,
+                            cmap="Blues", fmt="f",
+                            linewidths=.2, standard_scale=1,
+                            figsize=(30, 30), linecolor='black',
+                            annot=self.annot)
+        plt.setp(cg.ax_heatmap.yaxis.get_majorticklabels(), rotation=0, fontsize=20)
+        plt.setp(cg.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, fontsize=20)
+        plt.savefig(self.name + '_' + 'clustermap' + '.' + self.fmt, bbox_inches='tight', format=self.fmt)
+        if self.display:
+            plt.show()
+
+    def build_interactive_heatmap(self):
+        """
+        Create an interactive heatmap of mean_enrichment data across
+        all conditions & times & metabolites
+        """
+
+        output_file(filename=self.name + '_' + 'heatmap' + ".html", title=self.name + ".html")
+        condition_time = list(self.heatmapdf.index.astype(str))
+        metabolites = list(self.heatmapdf.columns)
+        # Nous réordonnons les données
+        df = pd.DataFrame(self.heatmapdf.stack(), columns=["values"]).reset_index()
+        # Nous préparons les couleurs
+        colors = cc.kbc[len(df)]
+        mapper = LinearColorMapper(palette=cc.kbc[:len(df)])
+        tooltips = "hover,save"
+        # initialisation de la figure
+        myplot = figure(title=self.name,
+                        x_range=list(reversed(metabolites)), y_range=condition_time,
+                        x_axis_location="below", plot_width=1080, plot_height=640,
+                        tools=tooltips, toolbar_location='above',
+                        tooltips=[('datapoint', '@metabolite @Condition_Time'), ('value', "@values")])
+        myplot.grid.grid_line_color = None
+        myplot.axis.axis_line_color = None
+        myplot.axis.major_tick_line_color = None
+        myplot.axis.major_label_text_font_size = "15px"
+        myplot.axis.major_label_standoff = 0
+        myplot.xaxis.major_label_orientation = math.pi / 3
+        # Passons au plot
+        myplot.rect(x="metabolite",
+                    y="Condition_Time",
+                    width=1, height=1,
+                    source=df,
+                    fill_color={'field': "values", 'transform': mapper},
+                    line_color=None)
+        # Nous préparons la barre de couleur pour la légende
+        color_bar = ColorBar(color_mapper=mapper, major_label_text_font_size="7px",
+                             ticker=BasicTicker(desired_num_ticks=len(colors)),
+                             formatter=PrintfTickFormatter(),
+                             label_standoff=6, border_line_color=None, location=(0, 0))
+        # Ajoutons la barre de couleur de la légende
+        myplot.add_layout(color_bar, 'right')
+        if self.display:
+            show(myplot)
+        else:
+            save(myplot)
