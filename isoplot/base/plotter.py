@@ -5,7 +5,8 @@ import math
 import colorcet as cc
 import matplotlib.pyplot as plt
 from bokeh.io import output_file, show, save
-from bokeh.models import FactorRange, BasicTicker, ColorBar, LinearColorMapper, PrintfTickFormatter, ColumnDataSource
+from bokeh.models import FactorRange, BasicTicker, ColorBar, \
+    LinearColorMapper, PrintfTickFormatter, ColumnDataSource, Whisker
 from bokeh.transform import factor_cmap
 from bokeh.plotting import figure
 import seaborn as sns
@@ -183,12 +184,22 @@ class InteractivePlot(StaticPlot):
             )
         return whisker_points
 
+    def _build_whiskers(self, plot, df, df_sds, x_values):
+
+        whisker_points = self._compute_whisker_points(df, df_sds, x_values)
+        for key in whisker_points.keys():
+            cds = ColumnDataSource(data=whisker_points[key])
+            plot.add_layout(
+                Whisker(source=cds, base="base", upper="upper", lower="lower", level="overlay")
+            )
+        return plot
+
     def _pivot_data(self, mean):
         """
         Pivot the data to get the isotopologues as columns.
 
-        :param mean: should means be computed (error bars)
-        :return: pivoted dataframes
+        :param mean: if true, the function will return two dataframes: the first is a df of means and the second of SDs
+        :return: pivoted dataframe(s)
         """
 
         if mean:
@@ -264,13 +275,7 @@ class InteractivePlot(StaticPlot):
         plot.legend.orientation = "horizontal"
         plot.outline_line_color = "black"
         if mean:
-            from bokeh.models import Whisker
-            whisker_points = self._compute_whisker_points(df, df_sds, x_range)
-            for key in whisker_points.keys():
-                cds = ColumnDataSource(data=whisker_points[key])
-                plot.add_layout(
-                    Whisker(source=cds, base="base", upper="upper", lower="lower", level="overlay")
-                )
+            plot = self._build_whiskers(plot, df, df_sds, x_range)
         return plot
 
     def _build_unstacked_barplot(self, mean):
@@ -335,13 +340,7 @@ class InteractivePlot(StaticPlot):
                                          start=1, end=2),
                   line_color="white")
         if mean:
-            from bokeh.models import Whisker
-            whisker_points = self._compute_whisker_points(df, df_sds, x)
-            for key in whisker_points.keys():
-                cds = ColumnDataSource(data=whisker_points[key])
-                plot.add_layout(
-                    Whisker(source=cds, base="base", upper="upper", lower="lower", level="overlay")
-                )
+            plot = self._build_whiskers(plot, df, df_sds, x)
         plot.xaxis.major_label_orientation = math.pi / 4
         plot.y_range.start = 0
         plot.x_range.range_padding = 0.1
@@ -351,7 +350,15 @@ class InteractivePlot(StaticPlot):
 
         # TODO: fix tooltips not showing
 
-        df = self._pivot_data(mean)
+        try:
+            df, df_sds = self._pivot_data(mean)
+            df.columns, df_sds.columns = df.columns.astype(str), df_sds.columns.astype(str)
+        except ValueError:
+            df = self._pivot_data(mean)
+            df.columns = df.columns.astype(str)
+        except Exception:
+            raise RuntimeError("Error while pivoting the data")
+
         data_points = {str(col): df[col].to_list() for col in df.columns}
         stackers = list(data_points.keys())
         data_points.update({"x": df.index.to_list()})
@@ -415,13 +422,14 @@ class Map:
         """
 
         fig, ax = plt.subplots(figsize=(30, 30))
-        sns.set(font_scale=1)
+        sns.set(font_scale=0.5)
         sns.heatmap(self.heatmapdf, vmin=0.02,
                     robust=True, center=self.heatmap_center,
                     annot=self.annot, fmt="f", linecolor='black',
                     linewidths=.2, cmap='Blues', ax=ax)
-        plt.yticks(rotation=0, fontsize=20)
-        plt.xticks(rotation=45, fontsize=20)
+        plt.yticks(rotation=0, fontsize=10)
+        plt.xticks(rotation=45, fontsize=10, ha='right')
+        fig.tight_layout()
         if self.display:
             plt.show()
         return fig
@@ -432,15 +440,16 @@ class Map:
         all conditions & times & metabolites
         """
 
-        sns.set(font_scale=1)
+        sns.set(font_scale=0.5)
         cg = sns.clustermap(self.clustermapdf,
                             cmap="Blues", fmt="f",
                             linewidths=.2, standard_scale=1,
-                            figsize=(30, 30), linecolor='black',
+                            figsize=(30, 20), linecolor='black',
                             annot=self.annot)
-        plt.setp(cg.ax_heatmap.yaxis.get_majorticklabels(), rotation=0, fontsize=20)
-        plt.setp(cg.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, fontsize=20)
+        plt.setp(cg.ax_heatmap.yaxis.get_majorticklabels(), rotation=0, fontsize=10)
+        plt.setp(cg.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, fontsize=10)
         plt.savefig(self.name + '_' + 'clustermap' + '.' + self.fmt, bbox_inches='tight', format=self.fmt)
+        plt.tight_layout()
         if self.display:
             plt.show()
 
