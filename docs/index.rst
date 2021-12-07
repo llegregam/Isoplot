@@ -18,7 +18,7 @@ biological interpretation, project reports, published papers and so forth.
 It is one of the routine tools used on the `MetaToul platform
 <https://www6.toulouse.inrae.fr/metatoul>`_.
 
-The code is open-source, and available on `GitHub <https://www.github.com/llegregam/Isoplot/>`_ under a GPLv3 license .
+The code is open-source, and available on `GitHub <https://github.com/llegregam/Isoplot>`_ under a GPLv3 license .
 
 .. rubric:: Key Features
 
@@ -28,7 +28,7 @@ The code is open-source, and available on `GitHub <https://www.github.com/llegre
 * **Open-source, free and easy to install** everywhere where Python 3 is available
 * **Biologist-friendly**
 
-The documentation relative to Isoplot's installation and usage can be found on `ReadTheDocs <https://isoplot2.readthedocs.io/>`_.
+The documentation relative to Isoplot's installation and usage can be found on `ReadTheDocs <https://isoplot.readthedocs.io/>`_.
 
 
 .. toctree::

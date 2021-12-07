@@ -23,6 +23,65 @@ You are now ready to start Isoplot.
 There are two ways to use isoplot : through the dedicated jupyter notebook (recommended) or through the command line.
 
 
+Environment installation
+------------------------
+
+One of the advantages of the Anaconda Suite is that it gives access to a user-friendly GUI for the creation and
+maintenance of python environments. Python environments give the user a way to separate different installations of
+tools so that different package dependencies do not overlap  with each other. This is especially useful if packages
+share the same dependencies but in different versions. The Anaconda Suite provides a quick and intuitive way of
+separating these installations.
+
+How to create an environment in Anaconda
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When the user opens up the Anaconda software, she/he ends up on the main menu:
+
+.. image:: _static/Environment_installation/1.jpg
+    :width: 100%
+    :align: center
+
+The main window shows all the tools available for installation in the Navigator. To get to the environments page, the
+user must click on the "Environments" panel that is in the left-side menu.
+
+.. image:: _static/Environment_installation/2.jpg
+    :width: 100%
+    :align: center
+
+Once on the Environments page, the user can click on the "create" button that is present at the bottom left of the
+screen. A pop up menu will then appear and allow the user to select a python version and a name for the environment.
+
+.. image:: _static/Environment_installation/3.jpg
+    :width: 100%
+    :align: center
+
+Once the user clicks on the "create" button the environment is created and ready for use!
+
+Installing packages in the environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Now that the environment exists, it is time to populate it with the tools needed. The first thing to do is to open
+up a command-line interface, preferably Anaconda Prompt (it is the one that will be used in this tutorial. Other
+command-line interfaces might use different names for commands). Once the interface is open, the first thing to do
+is to activate the desired environment. The command for this is as follows:
+
+.. code-block:: bash
+
+    conda activate <name-of-environment>
+
+Once this is done the environment name should be seen on the left of the screen behind the name of the directory
+the interface is open in.
+
+.. image:: _static/Environment_installation/4.jpg
+    :width: 100%
+    :align: center
+
+Once the environment is activated, the user can install using pip or conda any of the desired tools. The dependencies
+and the tool itself will now be installed in a safe and separate set of folders which will ensure that other
+installations are not affected by anything happening in the environment. Once the user is done, she/he can now
+close the prompt.
+
+
 Jupyter Notebook
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
